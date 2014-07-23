@@ -1,4 +1,4 @@
-jkal_filter
+JKal-Filter
 ===========
 
 A Kalman Filter library in Python.
