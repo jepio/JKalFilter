@@ -51,9 +51,25 @@ class TestMatrixFunctions(unittest.TestCase):
         other.zero(4, 3)
         other2 = matrix.Matrix()
         other2.zero(4, 4)
+        new = self.matrix + other
         with self.assertRaises(ValueError):
-            _ = self.matrix + other
             _ = self.matrix + other2
+        self.assertEqual(self.matrix.value, new.value)
+
+    def test_add2(self):
+        self.matrix.identity(3)
+        other = matrix.Matrix([[1,2,3],[4,5,6],[7,8,9]])
+        new = self.matrix + other - other
+        self.assertEqual(self.matrix.value, new.value)
+
+    def test_property(self):
+        self.matrix.identity(3)
+        new = matrix.Matrix()
+        new.value = self.matrix.value
+        self.assertEqual(new.size(), self.matrix.size())
+        self.matrix.value = [[1,2,3],[4,5,6]]
+        self.assertEqual(self.matrix.value, [[1,2,3],[4,5,6]])
+        self.assertEqual(self.matrix.size(), (2,3))
 
 
 if __name__ == "__main__":
