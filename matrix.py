@@ -28,6 +28,8 @@ class Matrix(object):
 
     def identity(self, dim):
         """ Make the matrix an identity. """
+        if dim < 1:
+            raise ValueError("Invalid size of matrix")
         self.zero(dim, dim)
         for i in range(dim):
             self.value[i][i] = 1
@@ -37,3 +39,20 @@ class Matrix(object):
         for i in range(self.dimx):
             print self.value[i]
         print ' '
+
+    def __repr__(self):
+        """ Return string representation of matrix. """
+        return '\n'.join(map(str, self.value))
+
+    def size(self):
+        """ Return shape of matrix. """
+        return (self.dimx, self.dimy)
+
+    def __getitem__(self, k):
+        """ Return row of matrix. """
+        return self.value[k]
+
+
+    def __add__(self, other):
+        if self.size() != other.size():
+            raise ValueError("Matrices are not the same size")
