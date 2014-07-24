@@ -3,7 +3,7 @@ A module implementing the Matrix class.
 Based on:
 https://github.com/ozzloy/udacity-cs373/blob/master/unit-2.py
 """
-# pylint: disable=W0141
+# pylint: disable=W0141,C0103
 
 class Matrix(object):
     """ A matrix class covering all major matrix operations. """
@@ -33,6 +33,11 @@ class Matrix(object):
         self.dimx = len(value)
         self.dimy = len(value[0])
         self._value = value
+
+    @property
+    def T(self):
+        """ Get transposed matrix. """
+        return self._transpose()
 
     ## Spawning special matrices
     @classmethod
@@ -73,7 +78,19 @@ class Matrix(object):
         """ Return row of matrix. """
         return self._value[k]
 
+    def _transpose(self):
+        """ Return a transposed of the self matrix. """
+        dimx, dimy = self.size()
+        value = [[self[y][x] for y in range(dimx)] for x in range(dimy)]
+        return Matrix(value)
+
     ## Arithmetics
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __neq__(self, other):
+        return self.value != other.value
+
     def __add__(self, other):
         if self.size() != other.size():
             raise ValueError("Matrices are not the same size")

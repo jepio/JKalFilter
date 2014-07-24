@@ -69,6 +69,13 @@ class TestMatrixFunctions(unittest.TestCase):
         self.assertEqual(self.matrix.value, [[1,2,3],[4,5,6]])
         self.assertEqual(self.matrix.size(), (2,3))
 
+    def test_transpose(self):
+        self.matrix = matrix.Matrix.identity(3)
+        self.assertEqual(self.matrix, self.matrix.T)
+        new = matrix.Matrix([[1,2,3],[4,5,6]])
+        self.assertEqual(new.T.size(), (3,2))
+        self.assertEqual(new, new.T.T)
+
 
 if __name__ == "__main__":
     SUITE = unittest.TestLoader().loadTestsFromTestCase(TestMatrixFunctions)
