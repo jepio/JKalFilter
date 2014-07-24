@@ -68,7 +68,15 @@ class Matrix(object):
 
     def __repr__(self):
         """ Return string representation of matrix. """
-        return '\n'.join(map(str, self._value))
+        name = self.__class__.__name__ + "(["
+        # class name and left bracket
+        pad = len(name)
+        join_string = ',\n'+ ' ' * pad
+        return name + join_string.join(map(str, self._value)) + "])"
+
+    def __str__(self):
+        """ Return the printed version of matrix. """
+        return '[' + ",\n ".join(map(str, self._value)) + ']'
 
     def size(self):
         """ Return shape of matrix. """
