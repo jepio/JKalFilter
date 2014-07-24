@@ -5,7 +5,9 @@ https://github.com/ozzloy/udacity-cs373/blob/master/unit-2.py
 """
 # pylint: disable=W0141,C0103
 
+
 class Matrix(object):
+
     """ A matrix class covering all major matrix operations. """
 
     def __init__(self, value=None):
@@ -19,14 +21,14 @@ class Matrix(object):
             self._value = value
             self.dimx = len(value)
             self.dimy = len(value[0])
-        #if value == [[]]:
+        # if value == [[]]:
         #    self.dimx = 0
-
 
     @property
     def value(self):
         """ Get matrix value. """
         return self._value
+
     @value.setter
     def value(self, value):
         """ Set matrix value. """
@@ -39,7 +41,7 @@ class Matrix(object):
         """ Get transposed matrix. """
         return self._transpose()
 
-    ## Spawning special matrices
+    ##################### Spawning special matrices ####################
     @classmethod
     def zero(cls, dimx, dimy):
         """ Return a zero matrix. """
@@ -59,19 +61,19 @@ class Matrix(object):
             self.value[i][i] = 1
         return self
 
-
     def show(self):
         """ Print the matrix. """
         for i in range(self.dimx):
             print self._value[i]
         print ' '
 
+    ####################### Helper methods  ############################
     def __repr__(self):
         """ Return string representation of matrix. """
         name = self.__class__.__name__ + "(["
         # class name and left bracket
         pad = len(name)
-        join_string = ',\n'+ ' ' * pad
+        join_string = ',\n' + ' ' * pad
         return name + join_string.join(map(str, self._value)) + "])"
 
     def __str__(self):
@@ -87,12 +89,12 @@ class Matrix(object):
         return self._value[k]
 
     def _transpose(self):
-        """ Return a transposed of the self matrix. """
+        """ Return a transpose of the matrix. """
         dimx, dimy = self.size()
         value = [[self[y][x] for y in range(dimx)] for x in range(dimy)]
         return Matrix(value)
 
-    ## Arithmetics
+    ############################ Arithmetics ###########################
     def __eq__(self, other):
         return self.value == other.value
 
@@ -120,12 +122,15 @@ class Matrix(object):
         dimx2, _ = other.size()
         if dimy1 != dimx2:
             raise ValueError("Matrices do not have the proper dimensions")
+
+        # Easier to handle transposed matrix - columns of original are then
+        # lists
         other = other.T
 
         def func(row, col):
             """ Return the vector product for row v and col v. """
-            ## Row and column are the same length
-            ## Create a list of tuples containing entries
+            # Row and column are the same length
+            # Create a list of tuples containing entries
             zipped = zip(row, col)
             ## Reduce the tuples using multiplication
             func = lambda tupl: tupl[0]*tupl[1]
@@ -133,6 +138,6 @@ class Matrix(object):
             mult = sum(mult)
             return mult
 
-        ## other is transposed, so columns can be accessed as rows
+        # other is transposed, so columns can be accessed as lists
         new = [[func(row, col) for col in other.value] for row in self.value]
         return Matrix(new)
