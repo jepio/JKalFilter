@@ -108,4 +108,23 @@ class Matrix(object):
         return Matrix(new)
 
     def __mul__(self, other):
-        pass
+        _, dimy1 = self.size()
+        dimx2, _ = other.size()
+        if dimy1 != dimx2:
+            raise ValueError("Matrices do not have the proper dimensions")
+        other = other.T
+
+        def func(row, col):
+            """ Return the vector product for row v and col v. """
+            ## Row and column are the same length
+            ## Create a list of tuples containing entries
+            zipped = zip(row, col)
+            ## Reduce the tuples using multiplication
+            func = lambda tupl: tupl[0]*tupl[1]
+            mult = [func(tupl) for tupl in zipped]
+            mult = sum(mult)
+            return mult
+
+        ## other is transposed, so columns can be accessed as rows
+        new = [[func(row, col) for col in other.value] for row in self.value]
+        return Matrix(new)
