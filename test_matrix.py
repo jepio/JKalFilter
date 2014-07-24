@@ -3,6 +3,7 @@
 import matrix
 import unittest
 
+
 class TestMatrixFunctions(unittest.TestCase):
 
     def setUp(self):
@@ -27,21 +28,21 @@ class TestMatrixFunctions(unittest.TestCase):
         self.assertRaises(ValueError, self.matrix.identity, *(-1,))
 
     def test_indexing(self):
-        array = [[1,2,3],
-                 [4,5,6],
-                 [7,8,9]]
+        array = [[1, 2, 3],
+                 [4, 5, 6],
+                 [7, 8, 9]]
         self.matrix = matrix.Matrix(array)
         for x in range(3):
             for y in range(3):
                 self.assertEqual(self.matrix[x][y], array[x][y])
 
     def test_size(self):
-        array = [[1,2,3],
-                 [4,5,6],
-                 [7,8,9],
-                 [1,2,3],
-                 [4,5,6],
-                 [7,8,9]]
+        array = [[1, 2, 3],
+                 [4, 5, 6],
+                 [7, 8, 9],
+                 [1, 2, 3],
+                 [4, 5, 6],
+                 [7, 8, 9]]
         self.matrix = matrix.Matrix(array)
         self.assertEqual(self.matrix.size(), (6, 3))
 
@@ -56,7 +57,7 @@ class TestMatrixFunctions(unittest.TestCase):
 
     def test_add2(self):
         self.matrix = matrix.Matrix.identity(3)
-        other = matrix.Matrix([[1,2,3],[4,5,6],[7,8,9]])
+        other = matrix.Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         new = self.matrix + other - other
         self.assertEqual(self.matrix.value, new.value)
 
@@ -65,15 +66,15 @@ class TestMatrixFunctions(unittest.TestCase):
         new = matrix.Matrix()
         new.value = self.matrix.value
         self.assertEqual(new.size(), self.matrix.size())
-        self.matrix.value = [[1,2,3],[4,5,6]]
-        self.assertEqual(self.matrix.value, [[1,2,3],[4,5,6]])
-        self.assertEqual(self.matrix.size(), (2,3))
+        self.matrix.value = [[1, 2, 3], [4, 5, 6]]
+        self.assertEqual(self.matrix.value, [[1, 2, 3], [4, 5, 6]])
+        self.assertEqual(self.matrix.size(), (2, 3))
 
     def test_transpose(self):
         self.matrix = matrix.Matrix.identity(3)
         self.assertEqual(self.matrix, self.matrix.T)
-        new = matrix.Matrix([[1,2,3],[4,5,6]])
-        self.assertEqual(new.T.size(), (3,2))
+        new = matrix.Matrix([[1, 2, 3], [4, 5, 6]])
+        self.assertEqual(new.T.size(), (3, 2))
         self.assertEqual(new, new.T.T)
 
 
