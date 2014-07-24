@@ -21,8 +21,8 @@ class Matrix(object):
             self._value = value
             self.dimx = len(value)
             self.dimy = len(value[0])
-        # if value == [[]]:
-        #    self.dimx = 0
+        self._T = None
+        self._I = None
 
     ################# Properties available externally ##################
     @property
@@ -36,11 +36,15 @@ class Matrix(object):
         self.dimx = len(value)
         self.dimy = len(value[0])
         self._value = value
+        self._T = None
+        self._I = None
 
     @property
     def T(self):
         """ Get transposed matrix. """
-        return self._transpose()
+        if self._T is None:
+            self._T = self._transpose()
+        return self._T
 
     ##################### Spawning special matrices ####################
     @classmethod
@@ -230,4 +234,6 @@ class Matrix(object):
     @property
     def I(self):
         """ Get inverse matrix. """
-        return self._inverse()
+        if self._I is None:
+            self._I = self._inverse()
+        return self._I
