@@ -3,4 +3,4 @@ filter
 ------
 
 .. automodule:: filter
-
+   :exclude-members: __dict__,__weakref__

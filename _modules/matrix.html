@@ -145,13 +145,13 @@
         <span class="sd">&quot;&quot;&quot; Return row of matrix. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
 </div>
-    <span class="k">def</span> <span class="nf">_transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Matrix._transpose"><a class="viewcode-back" href="../matrix.html#matrix.Matrix._transpose">[docs]</a>    <span class="k">def</span> <span class="nf">_transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return a transpose of the matrix. &quot;&quot;&quot;</span>
         <span class="n">dimx</span><span class="p">,</span> <span class="n">dimy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
         <span class="n">value</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">self</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimx</span><span class="p">)]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimy</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="c">############################ Arithmetics ###########################</span>
+    <span class="c">############################ Arithmetics ###########################</span></div>
     <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">value</span>
 
@@ -281,12 +281,12 @@
             <span class="k">print</span> <span class="s">&quot;Matrix is not invertible&quot;</span>
         <span class="k">return</span> <span class="n">inverted</span>
 </div>
-    <span class="k">def</span> <span class="nf">_inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Matrix._inverse"><a class="viewcode-back" href="../matrix.html#matrix.Matrix._inverse">[docs]</a>    <span class="k">def</span> <span class="nf">_inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the inverse matrix. &quot;&quot;&quot;</span>
         <span class="n">L</span><span class="p">,</span> <span class="n">U</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LU</span><span class="p">()</span>
         <span class="n">new</span> <span class="o">=</span> <span class="n">Matrix</span><span class="o">.</span><span class="n">LUInvert</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new</span>
-
+</div>
     <span class="nd">@property</span>
 <div class="viewcode-block" id="Matrix.I"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.I">[docs]</a>    <span class="k">def</span> <span class="nf">I</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Get inverse matrix. &quot;&quot;&quot;</span>
