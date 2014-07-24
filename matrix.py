@@ -179,25 +179,29 @@ class Matrix(object):
     @staticmethod
     def LUInvert(L, U):
         """
-        Return the inverse matrix of L*U where LU are the LU decomposition
-        matrices.
+        Return the inverse matrix of :math:`L\\cdot U` where LU are the LU
+        decomposition matrices.
 
         The method works by looking at the solution to the system
 
-            LU*X = B
+        .. math::
+            LU \\cdot X = B
 
-        where, B - identity matrix, column by column.
+        column by column. :math:`B` is :math:`\\mathbb{1}` - the identity
+        matrix.
         First
 
-            Ly = b
+        .. math::
+            L \\cdot y = b
 
         is solved, then
 
-            Ux = y
+        .. math::
+            U \\cdot x = y
 
-        The solution X is then the matrix of column vectors x.
-        Since L and U are triangular matrices, the solution of these systems
-        can be found through simple gaussian elimination.
+        The inverse matrix is then :math:`X`, the matrix of column vectors
+        :math:`x`. Since L and U are both triangular matrices, the solution of
+        these systems can be found through simple gaussian elimination.
         """
 
         dim, _ = L.size()

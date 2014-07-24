@@ -17,14 +17,13 @@ class LKFilter(object):
         Initialize the Kalman Filter matrices. This implementation skips the
         control input. Symbols used:
 
-            A - state transition matrix - predict next state from current one
-            H - measurement matrix, calculate measurement from the state
-            x - initial estimate of the state
-            P - initial estimate of the state covariance matrix
-            Q - estimated process covariance
-            R - estimated measurement covariance
-            I - an identity matrix of size equal to dimension of the state
-                vector
+        * A - state transition matrix - predict next state from current one
+        * H - measurement matrix, calculate measurement from the state
+        * x - initial estimate of the state
+        * P - initial estimate of the state covariance matrix
+        * Q - estimated process covariance
+        * R - estimated measurement covariance
+        * I - an identity matrix of size equal to dimension of the state vector
         """
         self.A = _A
         self.H = _H
