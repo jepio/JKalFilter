@@ -171,3 +171,63 @@ class Matrix(object):
                     L[i][i] = 1e-40
                 U[i][j] = (self[i][j] - tot) / L[i][i]
         return (L, U)
+
+    @staticmethod
+    def LUInvert(L, U):
+        """
+        Return the inverse matrix of L*U where LU are the LU decomposition
+        matrices.
+
+        The method work by looking at the solution to the system
+
+            LU*X = B
+
+        where, B - identity matrix, column by column.
+        First
+
+            Ly = b
+
+        is solved, then
+
+            Ux = y
+
+        The solution X is then the matrix of column vectors x.
+        Since L and U are triangular matrices, the solution of these systems
+        can be found through simple gaussian elimination.
+        """
+
+        dim, _ = L.size()
+        inverted = Matrix.zero(dim, dim)
+        # unit = Matrix.identity(dim)
+        # Upper elimination
+        try:
+            for i in range(dim):
+                col_y = [0 for _ in range(dim)]
+
+                # The j'th row of the i'th column in an identity matrix will be
+                # the first one with a one
+                col_y[i] = 1.0 / L[i][i]
+                for j in range(i + 1, dim):
+                    rest = sum(l * y for y, l in zip(col_y[i:j], L[j][i:j]))
+                    col_y[j] = -rest / L[j][j]
+                col_x = [0 for _ in range(dim)]
+                for j in reversed(range(dim)):
+                    rest = sum(
+                        u * x for x, u in zip(col_x[j:dim], U[j][j:dim]))
+                    col_x[j] = (col_y[j] - rest) / U[j][j]
+                    inverted[j][i] = col_x[j]
+                # inverted[i] = col_y # <-- needs a __set_item__ method
+        except ZeroDivisionError:
+            print "Matrix is not invertible"
+        return inverted
+
+    def _inverse(self):
+        """ Return the inverse matrix. """
+        L, U = self.LU()
+        new = Matrix.LUInvert(L, U)
+        return new
+
+    @property
+    def I(self):
+        """ Get inverse matrix. """
+        return self._inverse()
