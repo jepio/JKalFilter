@@ -24,6 +24,7 @@ class Matrix(object):
         # if value == [[]]:
         #    self.dimx = 0
 
+    ################# Properties available externally ##################
     @property
     def value(self):
         """ Get matrix value. """
@@ -61,13 +62,13 @@ class Matrix(object):
             self.value[i][i] = 1
         return self
 
+    ####################### Helper methods  ############################
     def show(self):
         """ Print the matrix. """
         for i in range(self.dimx):
             print self._value[i]
         print ' '
 
-    ####################### Helper methods  ############################
     def __repr__(self):
         """ Return string representation of matrix. """
         name = self.__class__.__name__ + "(["
