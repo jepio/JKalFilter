@@ -132,10 +132,9 @@ class Matrix(object):
             # Row and column are the same length
             # Create a list of tuples containing entries
             zipped = zip(row, col)
-            ## Reduce the tuples using multiplication
-            func = lambda tupl: tupl[0]*tupl[1]
-            mult = [func(tupl) for tupl in zipped]
-            mult = sum(mult)
+            # Reduce the tuples using multiplication
+            func = lambda tupl: tupl[0] * tupl[1]
+            mult = sum(func(tupl) for tupl in zipped)
             return mult
 
         # other is transposed, so columns can be accessed as lists
