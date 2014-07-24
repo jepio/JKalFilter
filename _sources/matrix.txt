@@ -1,0 +1,6 @@
+
+matrix
+------
+
+.. automodule:: matrix
+

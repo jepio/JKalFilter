@@ -1,0 +1,166 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>filter &mdash; JKal-Filter 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="JKal-Filter 0.1 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">JKal-Filter 0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for filter</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot; Kalman Filter module &quot;&quot;&quot;</span>
+<span class="c"># pylint: disable=C0103</span>
+<span class="kn">from</span> <span class="nn">matrix</span> <span class="kn">import</span> <span class="n">Matrix</span>
+
+
+<div class="viewcode-block" id="LKFilter"><a class="viewcode-back" href="../filter.html#filter.LKFilter">[docs]</a><span class="k">class</span> <span class="nc">LKFilter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Linear Kalman Filter implementation.</span>
+
+<span class="sd">    For more details on this implementation go to:</span>
+<span class="sd">    http://greg.czerniak.info/guides/kalman1/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LKFilter.__init__"><a class="viewcode-back" href="../filter.html#filter.LKFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_A</span><span class="p">,</span> <span class="n">_H</span><span class="p">,</span> <span class="n">_x</span><span class="p">,</span> <span class="n">_P</span><span class="p">,</span> <span class="n">_Q</span><span class="p">,</span> <span class="n">_R</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the Kalman Filter matrices. This implementation skips the</span>
+<span class="sd">        control input. Symbols used:</span>
+
+<span class="sd">        * A - state transition matrix - predict next state from current one</span>
+<span class="sd">        * H - measurement matrix, calculate measurement from the state</span>
+<span class="sd">        * x - initial estimate of the state</span>
+<span class="sd">        * P - initial estimate of the state covariance matrix</span>
+<span class="sd">        * Q - estimated process covariance</span>
+<span class="sd">        * R - estimated measurement covariance</span>
+<span class="sd">        * I - an identity matrix of size equal to dimension of the state</span>
+<span class="sd">              vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">_A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">_H</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">_P</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="n">_Q</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">_R</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">Matrix</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">_x</span><span class="o">.</span><span class="n">size</span><span class="p">()))</span>
+</div>
+<div class="viewcode-block" id="LKFilter.get_state"><a class="viewcode-back" href="../filter.html#filter.LKFilter.get_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return current state vector and state covariance. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LKFilter.update"><a class="viewcode-back" href="../filter.html#filter.LKFilter.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update current state using the measurement. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">measurement</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Wrong vector shape&quot;</span><span class="p">)</span>
+        <span class="c"># Update</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">measurement</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">S</span><span class="o">.</span><span class="n">I</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">K</span> <span class="o">*</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">-</span> <span class="n">K</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span>
+</div>
+<div class="viewcode-block" id="LKFilter.predict"><a class="viewcode-back" href="../filter.html#filter.LKFilter.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Predict the next state based on current state. &quot;&quot;&quot;</span>
+        <span class="c"># Predict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span>
+</div>
+<div class="viewcode-block" id="LKFilter.step"><a class="viewcode-back" href="../filter.html#filter.LKFilter.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform one iteration of the Kalman Filter:</span>
+
+<span class="sd">            1. update state from measurement</span>
+<span class="sd">            2. predict next state from current</span>
+
+<span class="sd">        Depending on what is expected the order of these operations can also</span>
+<span class="sd">        be inverted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_state</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">JKal-Filter 0.1 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, jepio.
+      Last updated on Jul 24, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
