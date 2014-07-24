@@ -140,3 +140,33 @@ class Matrix(object):
         # other is transposed, so columns can be accessed as lists
         new = [[func(row, col) for col in other.value] for row in self.value]
         return Matrix(new)
+
+    # Special functions
+    def LU(self):
+        """
+        Return the LU decomposition of matrix, that is matrices L and U such
+        that L*U = self. Uses the Crout decomposition method, described at
+        http://en.wikipedia.org/wiki/Crout_matrix_decomposition
+
+        The input matrix needs to be square.
+        """
+        dimx, dimy = self.size()
+        if dimx != dimy:
+            raise ValueError("Matrix is not square")
+        dim = dimx
+        L = Matrix.zero(dim, dim)
+        U = Matrix.identity(dim)
+        for i in range(dim):
+            for j in range(i, dim):
+                tot = 0.0
+                for k in range(i):
+                    tot += L[j][k] * U[k][i]
+                L[j][i] = self[j][i] - tot
+            for j in range(i, dim):
+                tot = 0.0
+                for k in range(i):
+                    tot += L[i][k] * U[k][j]
+                if L[i][i] == 0:
+                    L[i][i] = 1e-40
+                U[i][j] = (self[i][j] - tot) / L[i][i]
+        return (L, U)
