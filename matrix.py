@@ -12,11 +12,16 @@ class Matrix(object):
         """ Create a matrix from list of lists. """
         if value is None:
             value = [[]]
-        self._value = value
-        self.dimx = len(value)
-        self.dimy = len(value[0])
+            self._value = value
+            self.dimx = 0
+            self.dimy = 0
+        else:
+            self._value = value
+            self.dimx = len(value)
+            self.dimy = len(value[0])
         #if value == [[]]:
         #    self.dimx = 0
+
 
     @property
     def value(self):
@@ -29,22 +34,26 @@ class Matrix(object):
         self.dimy = len(value[0])
         self._value = value
 
-    def zero(self, dimx, dimy):
-        """ Zero the matrix. """
+    ## Spawning special matrices
+    @classmethod
+    def zero(cls, dimx, dimy):
+        """ Return a zero matrix. """
         if dimx < 1 or dimy < 1:
             raise ValueError("Invalid size of matrix")
         else:
-            self.dimx = dimx
-            self.dimy = dimy
-            self._value = [[0 for _ in range(dimy)] for _ in range(dimx)]
+            value = [[0 for _ in range(dimy)] for _ in range(dimx)]
+            return cls(value)
 
-    def identity(self, dim):
-        """ Make the matrix an identity. """
+    @classmethod
+    def identity(cls, dim):
+        """ Return an identity matrix. """
         if dim < 1:
             raise ValueError("Invalid size of matrix")
-        self.zero(dim, dim)
+        self = cls.zero(dim, dim)
         for i in range(dim):
-            self._value[i][i] = 1
+            self.value[i][i] = 1
+        return self
+
 
     def show(self):
         """ Print the matrix. """
@@ -64,7 +73,7 @@ class Matrix(object):
         """ Return row of matrix. """
         return self._value[k]
 
-
+    ## Arithmetics
     def __add__(self, other):
         if self.size() != other.size():
             raise ValueError("Matrices are not the same size")
@@ -80,3 +89,6 @@ class Matrix(object):
         new = [[self[x][y] - other[x][y] for y in range(dimy)] for x in
                range(dimx)]
         return Matrix(new)
+
+    def __mul__(self, other):
+        pass

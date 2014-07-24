@@ -12,7 +12,7 @@ class TestMatrixFunctions(unittest.TestCase):
         self.matrix = None
 
     def test_zero(self):
-        self.matrix.zero(4, 3)
+        self.matrix = matrix.Matrix.zero(4, 3)
         zero_array = [[0 for _ in range(3)] for _ in range(4)]
         self.assertEqual(self.matrix.value, zero_array)
         self.assertRaises(ValueError, self.matrix.zero, *(-1, 3))
@@ -20,7 +20,7 @@ class TestMatrixFunctions(unittest.TestCase):
         self.assertRaises(ValueError, self.matrix.zero, *(-1, -1))
 
     def test_identity(self):
-        self.matrix.identity(5)
+        self.matrix = matrix.Matrix.identity(5)
         func = lambda x, y: 1 if x == y else 0
         ident_array = [[func(i, j) for i in range(5)] for j in range(5)]
         self.assertEqual(self.matrix.value, ident_array)
@@ -46,24 +46,22 @@ class TestMatrixFunctions(unittest.TestCase):
         self.assertEqual(self.matrix.size(), (6, 3))
 
     def test_add(self):
-        self.matrix.zero(4, 3)
-        other = matrix.Matrix()
-        other.zero(4, 3)
-        other2 = matrix.Matrix()
-        other2.zero(4, 4)
+        self.matrix = matrix.Matrix.zero(4, 3)
+        other = matrix.Matrix.zero(4, 3)
+        other2 = matrix.Matrix.zero(4, 4)
         new = self.matrix + other
         with self.assertRaises(ValueError):
             _ = self.matrix + other2
         self.assertEqual(self.matrix.value, new.value)
 
     def test_add2(self):
-        self.matrix.identity(3)
+        self.matrix = matrix.Matrix.identity(3)
         other = matrix.Matrix([[1,2,3],[4,5,6],[7,8,9]])
         new = self.matrix + other - other
         self.assertEqual(self.matrix.value, new.value)
 
     def test_property(self):
-        self.matrix.identity(3)
+        self.matrix = matrix.Matrix.identity(3)
         new = matrix.Matrix()
         new.value = self.matrix.value
         self.assertEqual(new.size(), self.matrix.size())
