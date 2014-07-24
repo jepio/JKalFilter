@@ -182,7 +182,7 @@ class Matrix(object):
         Return the inverse matrix of L*U where LU are the LU decomposition
         matrices.
 
-        The method work by looking at the solution to the system
+        The method works by looking at the solution to the system
 
             LU*X = B
 
