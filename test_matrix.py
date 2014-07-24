@@ -89,6 +89,18 @@ class TestMatrixFunctions(unittest.TestCase):
         self.matrix = matrix.Matrix([[-1, 0], [0, 1]])
         self.assertEqual(self.matrix * self.matrix, matrix.Matrix.identity(2))
 
+    def test_lu(self):
+        self.matrix = matrix.Matrix()
+        array = [[1, 0, 4], [2, 5, 0], [1, 5, 2]]
+        self.matrix.value = array
+        L, U = self.matrix.LU()
+        self.assertEqual(self.matrix, L * U)
+        self.matrix = matrix.Matrix.identity(10)
+        L, U = self.matrix.LU()
+        self.assertEqual(self.matrix, L)
+        self.assertEqual(self.matrix, U)
+        self.assertEqual(self.matrix, L * U)
+
 if __name__ == "__main__":
     SUITE = unittest.TestLoader().loadTestsFromTestCase(TestMatrixFunctions)
     unittest.TextTestRunner(verbosity=2).run(SUITE)
