@@ -77,6 +77,17 @@ class TestMatrixFunctions(unittest.TestCase):
         self.assertEqual(new.T.size(), (3, 2))
         self.assertEqual(new, new.T.T)
 
+    def test_multiply(self):
+        self.matrix = matrix.Matrix.identity(3)
+        other = matrix.Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        self.assertEqual(self.matrix * other, other)
+        self.assertEqual(matrix.Matrix.zero(3, 3) * self.matrix,
+                         matrix.Matrix.zero(3, 3))
+        self.matrix = matrix.Matrix([[1, 1, 1], [2, 2, 2]])
+        self.assertEqual((self.matrix * self.matrix.T).size(), (2, 2))
+        self.assertEqual((self.matrix.T * self.matrix).size(), (3, 3))
+        self.matrix = matrix.Matrix([[-1, 0], [0, 1]])
+        self.assertEqual(self.matrix * self.matrix, matrix.Matrix.identity(2))
 
 if __name__ == "__main__":
     SUITE = unittest.TestLoader().loadTestsFromTestCase(TestMatrixFunctions)
