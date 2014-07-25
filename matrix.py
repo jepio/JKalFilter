@@ -83,7 +83,14 @@ class Matrix(object):
         # class name and left bracket
         pad = len(name)
         join_string = ',\n' + ' ' * pad
-        return name + join_string.join(map(str, self._value)) + "])"
+
+        # formatting function
+        def format_row(row):
+            row = ["{:6.2f}".format(i) for i in row]
+            row = ','.join(row)
+            return '[' + row + ']'
+
+        return name + join_string.join(map(format_row, self._value)) + "])"
 
     def __str__(self):
         """ Return the printed version of matrix. """
