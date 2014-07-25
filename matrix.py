@@ -28,6 +28,10 @@ class Matrix(object):
     @property
     def value(self):
         """ Get matrix value. """
+        # Can't be sure if the user uses this to change a matrix entry so have
+        # to reset existing cached inverse and transpose.
+        self._T = None
+        self._I = None
         return self._value
 
     @value.setter
@@ -91,7 +95,7 @@ class Matrix(object):
 
     def __getitem__(self, k):
         """ Return row of matrix. """
-        return self._value[k]
+        return self.value[k]
 
     def _transpose(self):
         """ Return a transpose of the matrix. """
