@@ -1,5 +1,5 @@
 """ Kalman Filter module """
-# pylint: disable=C0103
+# pylint: disable=C0103,R0192
 from matrix import Matrix
 
 
@@ -12,10 +12,10 @@ class LKFilter(object):
     http://greg.czerniak.info/guides/kalman1/
     """
 
-    def __init__(self, _A, _H, _x, _P, _Q, _R):
+    def __init__(self, A, H, x, P, Q, R):
         """
         Initialize the Kalman Filter matrices. This implementation skips the
-        control input. Symbols used:
+        control input vector. Symbols used:
 
         * A - state transition matrix - predict next state from current one
         * H - measurement matrix, calculate measurement from the state
@@ -25,13 +25,14 @@ class LKFilter(object):
         * R - estimated measurement covariance
         * I - an identity matrix of size equal to dimension of the state vector
         """
-        self.A = _A
-        self.H = _H
-        self.x = _x
-        self.P = _P
-        self.Q = _Q
-        self.R = _R
-        self.I = Matrix.identity(max(_x.size()))
+        self.A = A
+        self.H = H
+        self.x = x
+        self.P = P
+        self.Q = Q
+        self.R = R
+        self.I = Matrix.identity(max(x.size()))
+        self.measurements = None
 
     def get_state(self):
         """ Return current state vector and state covariance. """
@@ -67,3 +68,32 @@ class LKFilter(object):
         self.update(measurement)
         self.predict()
         return self.get_state()
+
+    def add_meas(self, measurements):
+        """
+        Assign measurements to the Kalman Filter object. Necessary for
+        iteration, does nothing if invoking :py:meth:`.step` by hand.
+        """
+        self.measurements = measurements
+
+    def __iter__(self):
+        if self.measurements is None:
+            raise StopIteration
+        else:
+            return self
+
+    def next(self):
+        """
+        Return the next iteration of the Kalman Filter. Requires that the
+        list of measurements be assigned to the filter first via
+        :py:meth:`.add_meas`.
+        """
+        try:
+            current = self.measurements[0]
+            ret = self.step(current)
+            del self.measurements[0]
+            return ret
+        except IndexError:
+            # Remove remaining measurements.
+            self.measurements = None
+            raise StopIteration
