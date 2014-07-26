@@ -8,7 +8,46 @@ https://github.com/ozzloy/udacity-cs373/blob/master/unit-2.py
 
 class Matrix(object):
 
-    """ A matrix class covering all major matrix operations. """
+    """
+    A matrix class covering all major matrix operations. Currently the
+    operations +, - and * are supported. Matrix elements can also be accessed
+    and modified using indexing.
+
+    A matrix is constructed in one of two ways: passing a list of lists to the
+    constructor or creating an :py:meth:`identity`/:py:meth:`zero` matrix and
+    modifying the elements. If the constructor is invoked without parameters an empty matrix will be initialized from the list [[]].
+
+        >>> A = Matrix([[1,2,3],[4,5,6]])
+        >>> A
+        Matrix([[  1.00,  2.00,  3.00],
+                [  4.00,  5.00,  6.00]])
+        >>> A[1][1]
+        5
+        >>> A[1][1] = 0.0
+        >>> A
+        Matrix([[  1.00,  2.00,  3.00],
+                [  4.00,  0.00,  6.00]])
+
+    Once a row has been accessed, the columns of that row can be sliced and
+    modified.
+
+        >>> A[1][:] = [5, 5, 5]
+        Matrix([[  1.00,  2.00,  3.00],
+                [  5.00,  5.00,  5.00]])
+
+    By accessing the :py:attr:`I` or :py:attr:`T` fields the
+    inverse/transposed matrix can be retrieved accordingly. An existing matrix
+    may be modified by assigning a list of lists to the :py:attr:`value` field.
+
+        >>> A.value = [[1, 1],[-1, 1]]
+        >>> A
+        Matrix([[  1.00,  1.00],
+                [ -1.00,  1.00]])
+        >>> A * A.I
+        Matrix([[  1.00,  0.00],
+                [  0.00,  1.00]])
+
+    """
 
     def __init__(self, value=None):
         """ Create a matrix from list of lists. """
@@ -27,7 +66,7 @@ class Matrix(object):
     ################# Properties available externally ##################
     @property
     def value(self):
-        """ Get matrix value. """
+        """ Get underlying matrix value, that is a list of list. """
         # Can't be sure if the user uses this to change a matrix entry so have
         # to reset existing cached inverse and transpose.
         self._T = None
@@ -45,7 +84,12 @@ class Matrix(object):
 
     @property
     def T(self):
-        """ Get transposed matrix. """
+        """
+        Get transposed matrix. The result is cached so that subsequent
+        accesses to the transposed matrix are instantaneous. The result is
+        uncached if the user accesses the matrix :py:attr:`.value` or a matrix
+        element through indexing.
+        """
         if self._T is None:
             self._T = self._transpose()
         return self._T
@@ -53,7 +97,7 @@ class Matrix(object):
     ##################### Spawning special matrices ####################
     @classmethod
     def zero(cls, dimx, dimy):
-        """ Return a zero matrix. """
+        """ Return a zero matrix of size *dimx* x *dimy*. """
         if dimx < 1 or dimy < 1:
             raise ValueError("Invalid size of matrix")
         else:
@@ -62,7 +106,7 @@ class Matrix(object):
 
     @classmethod
     def identity(cls, dim):
-        """ Return an identity matrix. """
+        """ Return an identity matrix of size *dim* x *dim*. """
         if dim < 1:
             raise ValueError("Invalid size of matrix")
         self = cls.zero(dim, dim)
@@ -97,7 +141,9 @@ class Matrix(object):
         return '[' + ",\n ".join(map(str, self._value)) + ']'
 
     def size(self):
-        """ Return shape of matrix. """
+        """
+        Return shape of matrix as a tuple (*dimx*, *dimy*).
+        """
         return (self.dimx, self.dimy)
 
     def __getitem__(self, k):
@@ -160,8 +206,9 @@ class Matrix(object):
     # Special functions
     def LU(self):
         """
-        Return the LU decomposition of matrix, that is matrices L and U such
-        that L*U = self. Uses the Crout decomposition method, described at
+        Return the LU decomposition of matrix, that is matrices :math:`L` and
+        :math:`U` such that :math:`LU = \text{self}`. Uses the Crout
+        decomposition method, described at
         http://en.wikipedia.org/wiki/Crout_matrix_decomposition
 
         The input matrix needs to be square.
@@ -183,23 +230,24 @@ class Matrix(object):
                 for k in range(i):
                     tot += L[i][k] * U[k][j]
                 if L[i][i] == 0:
-                    L[i][i] = 1e-40
+                    L[i][i] = 1e-20
                 U[i][j] = (self[i][j] - tot) / L[i][i]
         return (L, U)
 
     @staticmethod
     def LUInvert(L, U):
         """
-        Return the inverse matrix of :math:`L\\cdot U` where LU are the LU
-        decomposition matrices.
+        Return the inverse matrix of :math:`A = LU` where :math:`L, U`
+        are the LU decomposition matrices.
 
         The method works by looking at the solution to the system
 
         .. math::
             LU \\cdot X = B
 
-        column by column. :math:`B` is :math:`\\mathbb{1}` - the identity
-        matrix.
+        column by column (uncapitalized letters symbolize column vectors,
+        capitals represent the matrix of column vectors).
+        :math:`B` is :math:`\\mathbb{1}` - the identity matrix.
         First
 
         .. math::
@@ -211,8 +259,9 @@ class Matrix(object):
             U \\cdot x = y
 
         The inverse matrix is then :math:`X`, the matrix of column vectors
-        :math:`x`. Since L and U are both triangular matrices, the solution of
-        these systems can be found through simple gaussian elimination.
+        :math:`x`. Since :math:`L` and :math:`U` are both triangular matrices,
+        the solution of these systems can be found through simple gaussian
+        elimination.
         """
 
         dim, _ = L.size()
@@ -236,9 +285,10 @@ class Matrix(object):
                     col_x[j] = (col_y[j] - rest) / U[j][j]
                     inverted[j][i] = col_x[j]
                 # inverted[i] = col_y # <-- needs a __set_item__ method
+            return inverted
         except ZeroDivisionError:
             print "Matrix is not invertible"
-        return inverted
+            return None
 
     def _inverse(self):
         """ Return the inverse matrix. """
@@ -248,7 +298,12 @@ class Matrix(object):
 
     @property
     def I(self):
-        """ Get inverse matrix. """
+        """
+        Get inverse matrix through LU decomposition. The result is cached so
+        that subsequent accesses to the inverse matrix are instantaneous. The
+        result is uncached if the user accesses the matrix :py:attr:`.value`
+        or a matrix element through indexing.
+        """
         if self._I is None:
             self._I = self._inverse()
         return self._I
