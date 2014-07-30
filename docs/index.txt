@@ -14,7 +14,8 @@ Contents:
 
    matrix
    filter
-
+   detector
+   track
 
 
 Indices and tables

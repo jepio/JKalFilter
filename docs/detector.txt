@@ -1,0 +1,6 @@
+
+detector
+--------
+
+.. automodule:: detector
+   :exclude-members: __dict__,__weakref__
