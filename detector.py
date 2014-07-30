@@ -104,14 +104,21 @@ class LayeredDetector(Detector):
         """ Draw the detector with points in each strip center. """
         x = []
         y = []
+        hits_x = []
+        hits_y = []
         for layer in self.layers:
             for strip in layer.strips:
                 temp_x, temp_y = strip.pos()
                 x.append(temp_x)
                 y.append(temp_y)
-        print x
-        print y
-        plt.scatter(x, y)
+            for strip in layer.hit_strips:
+                temp_x, temp_y = strip.pos()
+                hits_x.append(temp_x)
+                hits_y.append(temp_y)
+        print zip(x, y)
+        print zip(hits_x, hits_y)
+        plt.scatter(x, y, color='b')
+        plt.scatter(hits_x, hits_y, color='r')
         plt.title("Layered Detector")
         plt.show()
 
