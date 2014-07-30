@@ -34,7 +34,7 @@ class Detector(object):
 
 class Strip(Detector):
 
-    """ A strip detector, part of a layer. """
+    """ A strip detector, part of a :py:class:`.Layer`. """
 
     def __init__(self, x, y, height, x_err=0, y_err=-1, parent=None):
         # Uniform distribution errors
@@ -47,7 +47,7 @@ class Strip(Detector):
 
 class Layer(Detector):
 
-    """ A layer detector containing strips. """
+    """ A layer detector containing :py:class:`.Strip`. """
 
     def __init__(self, x, y, height, num_strips, parent):
         super(Layer, self).__init__(x, y)
@@ -92,7 +92,7 @@ class Layer(Detector):
 
 class LayeredDetector(Detector):
 
-    """ A layered detector, consisting of layers. """
+    """ A layered detector, consisting of :py:class:`.Layer`. """
 
     def __init__(self, x, y, height, length, num_layers, num_strips):
         super(LayeredDetector, self).__init__(x, y)
