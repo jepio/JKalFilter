@@ -71,11 +71,13 @@ class Layer(Detector):
         """ Increment the hit amount in the correct strip. """
         if self.x != x:
             return
-        if y > self.top or y < self.bottom:
+        # Needs to be this way for the rare case where y == self.top, because
+        # I'm going to use floor
+        if y >= self.top or y < self.bottom:
             return
         super(Layer, self).hit(x, y)
         # Increment the proper strip and add strip to hit_strips list
-        num_strip = math.floor((y - self.bottom) / self.strip_height)
+        num_strip = int(math.floor((y - self.bottom) / self.strip_height))
         self.strips[num_strip].hit(x, y)
         if self.strips[num_strip] not in self.hit_strips:
             self.hit_strips.append(self.strips[num_strip])
