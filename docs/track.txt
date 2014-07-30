@@ -1,6 +1,16 @@
 
-track
-------
+:py:mod:`track`
+================
 
 .. automodule:: track
+   :no-members:
+
+:py:class:`Track`
+------------------
+.. autoclass:: Track
+   :exclude-members: __dict__,__weakref__
+
+:py:class:`LineTrack`
+----------------------
+.. autoclass:: LineTrack
    :exclude-members: __dict__,__weakref__

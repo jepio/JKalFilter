@@ -1,6 +1,12 @@
 
-filter
-------
+:py:mod:`filter`
+=================
 
 .. automodule:: filter
+   :no-members:
+
+
+:py:class:`LKFilter`
+--------------------
+.. autoclass:: LKFilter
    :exclude-members: __dict__,__weakref__

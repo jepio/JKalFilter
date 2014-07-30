@@ -1,5 +1,5 @@
 """
-A module implementing the Matrix class.
+A module implementing the :py:class:`Matrix` class.
 Based on:
 https://github.com/ozzloy/udacity-cs373/blob/master/unit-2.py
 """

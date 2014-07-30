@@ -1,8 +1,13 @@
 
-matrix
-------
+:py:mod:`matrix`
+=================
 
 .. automodule:: matrix
+   :no-members:
+
+:py:class:`Matrix`
+------------------
+.. autoclass:: Matrix
    :exclude-members: __dict__,__weakref__
    :no-private-members:
    :no-special-members:
