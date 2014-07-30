@@ -51,7 +51,7 @@
             
   <h1>Source code for filter</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot; Kalman Filter module &quot;&quot;&quot;</span>
-<span class="c"># pylint: disable=C0103</span>
+<span class="c"># pylint: disable=C0103,R0192</span>
 <span class="kn">from</span> <span class="nn">matrix</span> <span class="kn">import</span> <span class="n">Matrix</span>
 
 
@@ -64,10 +64,10 @@
 <span class="sd">    http://greg.czerniak.info/guides/kalman1/</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="LKFilter.__init__"><a class="viewcode-back" href="../filter.html#filter.LKFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_A</span><span class="p">,</span> <span class="n">_H</span><span class="p">,</span> <span class="n">_x</span><span class="p">,</span> <span class="n">_P</span><span class="p">,</span> <span class="n">_Q</span><span class="p">,</span> <span class="n">_R</span><span class="p">):</span>
+<div class="viewcode-block" id="LKFilter.__init__"><a class="viewcode-back" href="../filter.html#filter.LKFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Kalman Filter matrices. This implementation skips the</span>
-<span class="sd">        control input. Symbols used:</span>
+<span class="sd">        control input vector. Symbols used:</span>
 
 <span class="sd">        * A - state transition matrix - predict next state from current one</span>
 <span class="sd">        * H - measurement matrix, calculate measurement from the state</span>
@@ -77,13 +77,14 @@
 <span class="sd">        * R - estimated measurement covariance</span>
 <span class="sd">        * I - an identity matrix of size equal to dimension of the state vector</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">_A</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">_H</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">_x</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">_P</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="n">_Q</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">_R</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">Matrix</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">_x</span><span class="o">.</span><span class="n">size</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">H</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">P</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="n">Q</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">R</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">Matrix</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="bp">None</span>
 </div>
 <div class="viewcode-block" id="LKFilter.get_state"><a class="viewcode-back" href="../filter.html#filter.LKFilter.get_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return current state vector and state covariance. &quot;&quot;&quot;</span>
@@ -118,7 +119,36 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_state</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_state</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="LKFilter.add_meas"><a class="viewcode-back" href="../filter.html#filter.LKFilter.add_meas">[docs]</a>    <span class="k">def</span> <span class="nf">add_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurements</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign measurements to the Kalman Filter object. Necessary for</span>
+<span class="sd">        iteration, does nothing if invoking :py:meth:`.step` by hand.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="n">measurements</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="LKFilter.next"><a class="viewcode-back" href="../filter.html#filter.LKFilter.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the next iteration of the Kalman Filter. Requires that the</span>
+<span class="sd">        list of measurements be assigned to the filter first via</span>
+<span class="sd">        :py:meth:`.add_meas`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="c"># Remove remaining measurements.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span></div></div>
 </pre></div>
 
           </div>
@@ -158,7 +188,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2014, jepio.
-      Last updated on Jul 24, 2014.
+      Last updated on Jul 30, 2014.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

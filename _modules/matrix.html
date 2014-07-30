@@ -60,9 +60,48 @@
 
 <div class="viewcode-block" id="Matrix"><a class="viewcode-back" href="../matrix.html#matrix.Matrix">[docs]</a><span class="k">class</span> <span class="nc">Matrix</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot; A matrix class covering all major matrix operations. &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A matrix class covering all major matrix operations. Currently the</span>
+<span class="sd">    operations +, - and * are supported. Matrix elements can also be accessed</span>
+<span class="sd">    and modified using indexing.</span>
 
-<div class="viewcode-block" id="Matrix.__init__"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="sd">    A matrix is constructed in one of two ways: passing a list of lists to the</span>
+<span class="sd">    constructor or creating an :py:meth:`identity`/:py:meth:`zero` matrix and</span>
+<span class="sd">    modifying the elements. If the constructor is invoked without parameters an empty matrix will be initialized from the list [[]].</span>
+
+<span class="sd">        &gt;&gt;&gt; A = Matrix([[1,2,3],[4,5,6]])</span>
+<span class="sd">        &gt;&gt;&gt; A</span>
+<span class="sd">        Matrix([[  1.00,  2.00,  3.00],</span>
+<span class="sd">                [  4.00,  5.00,  6.00]])</span>
+<span class="sd">        &gt;&gt;&gt; A[1][1]</span>
+<span class="sd">        5</span>
+<span class="sd">        &gt;&gt;&gt; A[1][1] = 0.0</span>
+<span class="sd">        &gt;&gt;&gt; A</span>
+<span class="sd">        Matrix([[  1.00,  2.00,  3.00],</span>
+<span class="sd">                [  4.00,  0.00,  6.00]])</span>
+
+<span class="sd">    Once a row has been accessed, the columns of that row can be sliced and</span>
+<span class="sd">    modified.</span>
+
+<span class="sd">        &gt;&gt;&gt; A[1][:] = [5, 5, 5]</span>
+<span class="sd">        Matrix([[  1.00,  2.00,  3.00],</span>
+<span class="sd">                [  5.00,  5.00,  5.00]])</span>
+
+<span class="sd">    By accessing the :py:attr:`I` or :py:attr:`T` fields the</span>
+<span class="sd">    inverse/transposed matrix can be retrieved accordingly. An existing matrix</span>
+<span class="sd">    may be modified by assigning a list of lists to the :py:attr:`value` field.</span>
+
+<span class="sd">        &gt;&gt;&gt; A.value = [[1, 1],[-1, 1]]</span>
+<span class="sd">        &gt;&gt;&gt; A</span>
+<span class="sd">        Matrix([[  1.00,  1.00],</span>
+<span class="sd">                [ -1.00,  1.00]])</span>
+<span class="sd">        &gt;&gt;&gt; A * A.I</span>
+<span class="sd">        Matrix([[  1.00,  0.00],</span>
+<span class="sd">                [  0.00,  1.00]])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create a matrix from list of lists. &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="p">[[]]</span>
@@ -76,10 +115,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_T</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_I</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="c">################# Properties available externally ##################</span></div>
+    <span class="c">################# Properties available externally ##################</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Get matrix value. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Get underlying matrix value, that is a list of list. &quot;&quot;&quot;</span>
+        <span class="c"># Can&#39;t be sure if the user uses this to change a matrix entry so have</span>
+        <span class="c"># to reset existing cached inverse and transpose.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_T</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_I</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
 
     <span class="nd">@value.setter</span>
@@ -93,7 +136,12 @@
 </div>
     <span class="nd">@property</span>
 <div class="viewcode-block" id="Matrix.T"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.T">[docs]</a>    <span class="k">def</span> <span class="nf">T</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Get transposed matrix. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get transposed matrix. The result is cached so that subsequent</span>
+<span class="sd">        accesses to the transposed matrix are instantaneous. The result is</span>
+<span class="sd">        uncached if the user accesses the matrix :py:attr:`.value` or a matrix</span>
+<span class="sd">        element through indexing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T</span>
@@ -101,7 +149,7 @@
     <span class="c">##################### Spawning special matrices ####################</span></div>
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="Matrix.zero"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.zero">[docs]</a>    <span class="k">def</span> <span class="nf">zero</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">dimx</span><span class="p">,</span> <span class="n">dimy</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Return a zero matrix. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Return a zero matrix of size *dimx* x *dimy*. &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">dimx</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">dimy</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid size of matrix&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -110,7 +158,7 @@
 </div>
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="Matrix.identity"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.identity">[docs]</a>    <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Return an identity matrix. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Return an identity matrix of size *dim* x *dim*. &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid size of matrix&quot;</span><span class="p">)</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">zero</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span>
@@ -125,33 +173,42 @@
             <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="k">print</span> <span class="s">&#39; &#39;</span>
 </div>
-<div class="viewcode-block" id="Matrix.__repr__"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.__repr__">[docs]</a>    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return string representation of matrix. &quot;&quot;&quot;</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s">&quot;([&quot;</span>
         <span class="c"># class name and left bracket</span>
         <span class="n">pad</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">join_string</span> <span class="o">=</span> <span class="s">&#39;,</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="n">pad</span>
-        <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="n">join_string</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">))</span> <span class="o">+</span> <span class="s">&quot;])&quot;</span>
-</div>
-<div class="viewcode-block" id="Matrix.__str__"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.__str__">[docs]</a>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># formatting function</span>
+        <span class="k">def</span> <span class="nf">format_row</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;{:6.2f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s">&#39;[&#39;</span> <span class="o">+</span> <span class="n">row</span> <span class="o">+</span> <span class="s">&#39;]&#39;</span>
+
+        <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="n">join_string</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">format_row</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">))</span> <span class="o">+</span> <span class="s">&quot;])&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the printed version of matrix. &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s">&#39;[&#39;</span> <span class="o">+</span> <span class="s">&quot;,</span><span class="se">\n</span><span class="s"> &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;]&#39;</span>
-</div>
+
 <div class="viewcode-block" id="Matrix.size"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Return shape of matrix. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return shape of matrix as a tuple (*dimx*, *dimy*).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimy</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="Matrix.__getitem__"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.__getitem__">[docs]</a>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return row of matrix. &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-</div>
-<div class="viewcode-block" id="Matrix._transpose"><a class="viewcode-back" href="../matrix.html#matrix.Matrix._transpose">[docs]</a>    <span class="k">def</span> <span class="nf">_transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return a transpose of the matrix. &quot;&quot;&quot;</span>
         <span class="n">dimx</span><span class="p">,</span> <span class="n">dimy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
         <span class="n">value</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">self</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimx</span><span class="p">)]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimy</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="c">############################ Arithmetics ###########################</span></div>
+    <span class="c">############################ Arithmetics ###########################</span>
     <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">value</span>
 
@@ -201,8 +258,9 @@
     <span class="c"># Special functions</span>
 <div class="viewcode-block" id="Matrix.LU"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.LU">[docs]</a>    <span class="k">def</span> <span class="nf">LU</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the LU decomposition of matrix, that is matrices L and U such</span>
-<span class="sd">        that L*U = self. Uses the Crout decomposition method, described at</span>
+<span class="sd">        Return the LU decomposition of matrix, that is matrices :math:`L` and</span>
+<span class="sd">        :math:`U` such that :math:`LU = \text{self}`. Uses the Crout</span>
+<span class="sd">        decomposition method, described at</span>
 <span class="sd">        http://en.wikipedia.org/wiki/Crout_matrix_decomposition</span>
 
 <span class="sd">        The input matrix needs to be square.</span>
@@ -224,23 +282,24 @@
                 <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
                     <span class="n">tot</span> <span class="o">+=</span> <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">U</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-40</span>
+                    <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-20</span>
                 <span class="n">U</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">tot</span><span class="p">)</span> <span class="o">/</span> <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
 </div>
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="Matrix.LUInvert"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.LUInvert">[docs]</a>    <span class="k">def</span> <span class="nf">LUInvert</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">U</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the inverse matrix of :math:`L\\cdot U` where LU are the LU</span>
-<span class="sd">        decomposition matrices.</span>
+<span class="sd">        Return the inverse matrix of :math:`A = LU` where :math:`L, U`</span>
+<span class="sd">        are the LU decomposition matrices.</span>
 
 <span class="sd">        The method works by looking at the solution to the system</span>
 
 <span class="sd">        .. math::</span>
 <span class="sd">            LU \\cdot X = B</span>
 
-<span class="sd">        column by column. :math:`B` is :math:`\\mathbb{1}` - the identity</span>
-<span class="sd">        matrix.</span>
+<span class="sd">        column by column (uncapitalized letters symbolize column vectors,</span>
+<span class="sd">        capitals represent the matrix of column vectors).</span>
+<span class="sd">        :math:`B` is :math:`\\mathbb{1}` - the identity matrix.</span>
 <span class="sd">        First</span>
 
 <span class="sd">        .. math::</span>
@@ -252,8 +311,9 @@
 <span class="sd">            U \\cdot x = y</span>
 
 <span class="sd">        The inverse matrix is then :math:`X`, the matrix of column vectors</span>
-<span class="sd">        :math:`x`. Since L and U are both triangular matrices, the solution of</span>
-<span class="sd">        these systems can be found through simple gaussian elimination.</span>
+<span class="sd">        :math:`x`. Since :math:`L` and :math:`U` are both triangular matrices,</span>
+<span class="sd">        the solution of these systems can be found through simple gaussian</span>
+<span class="sd">        elimination.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">dim</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
@@ -277,19 +337,25 @@
                     <span class="n">col_x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">col_y</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">rest</span><span class="p">)</span> <span class="o">/</span> <span class="n">U</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
                     <span class="n">inverted</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">col_x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
                 <span class="c"># inverted[i] = col_y # &lt;-- needs a __set_item__ method</span>
+            <span class="k">return</span> <span class="n">inverted</span>
         <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&quot;Matrix is not invertible&quot;</span>
-        <span class="k">return</span> <span class="n">inverted</span>
+            <span class="k">return</span> <span class="bp">None</span>
 </div>
-<div class="viewcode-block" id="Matrix._inverse"><a class="viewcode-back" href="../matrix.html#matrix.Matrix._inverse">[docs]</a>    <span class="k">def</span> <span class="nf">_inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the inverse matrix. &quot;&quot;&quot;</span>
         <span class="n">L</span><span class="p">,</span> <span class="n">U</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LU</span><span class="p">()</span>
         <span class="n">new</span> <span class="o">=</span> <span class="n">Matrix</span><span class="o">.</span><span class="n">LUInvert</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new</span>
-</div>
+
     <span class="nd">@property</span>
 <div class="viewcode-block" id="Matrix.I"><a class="viewcode-back" href="../matrix.html#matrix.Matrix.I">[docs]</a>    <span class="k">def</span> <span class="nf">I</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Get inverse matrix. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get inverse matrix through LU decomposition. The result is cached so</span>
+<span class="sd">        that subsequent accesses to the inverse matrix are instantaneous. The</span>
+<span class="sd">        result is uncached if the user accesses the matrix :py:attr:`.value`</span>
+<span class="sd">        or a matrix element through indexing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_I</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_I</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inverse</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_I</span></div></div>
@@ -332,7 +398,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2014, jepio.
-      Last updated on Jul 24, 2014.
+      Last updated on Jul 30, 2014.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

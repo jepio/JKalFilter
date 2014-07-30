@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>matrix &mdash; JKal-Filter 0.1 documentation</title>
+    <title>1. matrix &mdash; JKal-Filter 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -27,7 +27,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="JKal-Filter 0.1 documentation" href="index.html" />
-    <link rel="next" title="filter" href="filter.html" />
+    <link rel="next" title="2. filter" href="filter.html" />
     <link rel="prev" title="Welcome to JKal-Filter’s documentation!" href="index.html" /> 
   </head>
   <body>
@@ -41,7 +41,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="filter.html" title="filter"
+          <a href="filter.html" title="2. filter"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to JKal-Filter’s documentation!"
@@ -56,25 +56,65 @@
           <div class="body">
             
   <div class="section" id="module-matrix">
-<span id="matrix"></span><h1>matrix<a class="headerlink" href="#module-matrix" title="Permalink to this headline">¶</a></h1>
+<span id="matrix"></span><h1>1. matrix<a class="headerlink" href="#module-matrix" title="Permalink to this headline">¶</a></h1>
 <p>A module implementing the Matrix class.
 Based on:
 <a class="reference external" href="https://github.com/ozzloy/udacity-cs373/blob/master/unit-2.py">https://github.com/ozzloy/udacity-cs373/blob/master/unit-2.py</a></p>
 <dl class="class">
 <dt id="matrix.Matrix">
 <em class="property">class </em><tt class="descclassname">matrix.</tt><tt class="descname">Matrix</tt><big>(</big><em>value=None</em><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>A matrix class covering all major matrix operations.</p>
+<dd><p>A matrix class covering all major matrix operations. Currently the
+operations +, - and * are supported. Matrix elements can also be accessed
+and modified using indexing.</p>
+<p>A matrix is constructed in one of two ways: passing a list of lists to the
+constructor or creating an <a class="reference internal" href="#matrix.Matrix.identity" title="matrix.Matrix.identity"><tt class="xref py py-meth docutils literal"><span class="pre">identity()</span></tt></a>/<a class="reference internal" href="#matrix.Matrix.zero" title="matrix.Matrix.zero"><tt class="xref py py-meth docutils literal"><span class="pre">zero()</span></tt></a> matrix and
+modifying the elements. If the constructor is invoked without parameters an empty matrix will be initialized from the list [[]].</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">A</span>
+<span class="go">Matrix([[  1.00,  2.00,  3.00],</span>
+<span class="go">        [  4.00,  5.00,  6.00]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">A</span>
+<span class="go">Matrix([[  1.00,  2.00,  3.00],</span>
+<span class="go">        [  4.00,  0.00,  6.00]])</span>
+</pre></div>
+</div>
+<p>Once a row has been accessed, the columns of that row can be sliced and
+modified.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="go">Matrix([[  1.00,  2.00,  3.00],</span>
+<span class="go">        [  5.00,  5.00,  5.00]])</span>
+</pre></div>
+</div>
+<p>By accessing the <a class="reference internal" href="#matrix.Matrix.I" title="matrix.Matrix.I"><tt class="xref py py-attr docutils literal"><span class="pre">I</span></tt></a> or <a class="reference internal" href="#matrix.Matrix.T" title="matrix.Matrix.T"><tt class="xref py py-attr docutils literal"><span class="pre">T</span></tt></a> fields the
+inverse/transposed matrix can be retrieved accordingly. An existing matrix
+may be modified by assigning a list of lists to the <a class="reference internal" href="#matrix.Matrix.value" title="matrix.Matrix.value"><tt class="xref py py-attr docutils literal"><span class="pre">value</span></tt></a> field.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">A</span>
+<span class="go">Matrix([[  1.00,  1.00],</span>
+<span class="go">        [ -1.00,  1.00]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">A</span> <span class="o">*</span> <span class="n">A</span><span class="o">.</span><span class="n">I</span>
+<span class="go">Matrix([[  1.00,  0.00],</span>
+<span class="go">        [  0.00,  1.00]])</span>
+</pre></div>
+</div>
 <dl class="attribute">
 <dt id="matrix.Matrix.I">
 <tt class="descname">I</tt><a class="reference internal" href="_modules/matrix.html#Matrix.I"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.I" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get inverse matrix.</p>
+<dd><p>Get inverse matrix through LU decomposition. The result is cached so
+that subsequent accesses to the inverse matrix are instantaneous. The
+result is uncached if the user accesses the matrix <a class="reference internal" href="#matrix.Matrix.value" title="matrix.Matrix.value"><tt class="xref py py-attr docutils literal"><span class="pre">value</span></tt></a>
+or a matrix element through indexing.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="matrix.Matrix.LU">
 <tt class="descname">LU</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix.LU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.LU" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the LU decomposition of matrix, that is matrices L and U such
-that L*U = self. Uses the Crout decomposition method, described at
+<dd><p>Return the LU decomposition of matrix, that is matrices <span class="math">\(L\)</span> and
+<span class="math">\(U\)</span> such that <span class="math">\(LU =         ext{self}\)</span>. Uses the Crout
+decomposition method, described at
 <a class="reference external" href="http://en.wikipedia.org/wiki/Crout_matrix_decomposition">http://en.wikipedia.org/wiki/Crout_matrix_decomposition</a></p>
 <p>The input matrix needs to be square.</p>
 </dd></dl>
@@ -82,13 +122,14 @@ that L*U = self. Uses the Crout decomposition method, described at
 <dl class="staticmethod">
 <dt id="matrix.Matrix.LUInvert">
 <em class="property">static </em><tt class="descname">LUInvert</tt><big>(</big><em>L</em>, <em>U</em><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix.LUInvert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.LUInvert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the inverse matrix of <span class="math">\(L\cdot U\)</span> where LU are the LU
-decomposition matrices.</p>
+<dd><p>Return the inverse matrix of <span class="math">\(A = LU\)</span> where <span class="math">\(L, U\)</span>
+are the LU decomposition matrices.</p>
 <p>The method works by looking at the solution to the system</p>
 <div class="math">
 \[LU \cdot X = B\]</div>
-<p>column by column. <span class="math">\(B\)</span> is <span class="math">\(\mathbb{1}\)</span> - the identity
-matrix.
+<p>column by column (uncapitalized letters symbolize column vectors,
+capitals represent the matrix of column vectors).
+<span class="math">\(B\)</span> is <span class="math">\(\mathbb{1}\)</span> - the identity matrix.
 First</p>
 <div class="math">
 \[L \cdot y = b\]</div>
@@ -96,56 +137,24 @@ First</p>
 <div class="math">
 \[U \cdot x = y\]</div>
 <p>The inverse matrix is then <span class="math">\(X\)</span>, the matrix of column vectors
-<span class="math">\(x\)</span>. Since L and U are both triangular matrices, the solution of
-these systems can be found through simple gaussian elimination.</p>
+<span class="math">\(x\)</span>. Since <span class="math">\(L\)</span> and <span class="math">\(U\)</span> are both triangular matrices,
+the solution of these systems can be found through simple gaussian
+elimination.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="matrix.Matrix.T">
 <tt class="descname">T</tt><a class="reference internal" href="_modules/matrix.html#Matrix.T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.T" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get transposed matrix.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="matrix.Matrix.__getitem__">
-<tt class="descname">__getitem__</tt><big>(</big><em>k</em><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.__getitem__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return row of matrix.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="matrix.Matrix.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>value=None</em><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a matrix from list of lists.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="matrix.Matrix.__repr__">
-<tt class="descname">__repr__</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix.__repr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.__repr__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return string representation of matrix.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="matrix.Matrix.__str__">
-<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.__str__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the printed version of matrix.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="matrix.Matrix._inverse">
-<tt class="descname">_inverse</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix._inverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix._inverse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the inverse matrix.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="matrix.Matrix._transpose">
-<tt class="descname">_transpose</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix._transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix._transpose" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a transpose of the matrix.</p>
+<dd><p>Get transposed matrix. The result is cached so that subsequent
+accesses to the transposed matrix are instantaneous. The result is
+uncached if the user accesses the matrix <a class="reference internal" href="#matrix.Matrix.value" title="matrix.Matrix.value"><tt class="xref py py-attr docutils literal"><span class="pre">value</span></tt></a> or a matrix
+element through indexing.</p>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="matrix.Matrix.identity">
 <em class="property">classmethod </em><tt class="descname">identity</tt><big>(</big><em>dim</em><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix.identity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.identity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an identity matrix.</p>
+<dd><p>Return an identity matrix of size <em>dim</em> x <em>dim</em>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -157,19 +166,19 @@ these systems can be found through simple gaussian elimination.</p>
 <dl class="method">
 <dt id="matrix.Matrix.size">
 <tt class="descname">size</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix.size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return shape of matrix.</p>
+<dd><p>Return shape of matrix as a tuple (<em>dimx</em>, <em>dimy</em>).</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="matrix.Matrix.value">
 <tt class="descname">value</tt><a class="reference internal" href="_modules/matrix.html#Matrix.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.value" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get matrix value.</p>
+<dd><p>Get underlying matrix value, that is a list of list.</p>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="matrix.Matrix.zero">
 <em class="property">classmethod </em><tt class="descname">zero</tt><big>(</big><em>dimx</em>, <em>dimy</em><big>)</big><a class="reference internal" href="_modules/matrix.html#Matrix.zero"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.Matrix.zero" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a zero matrix.</p>
+<dd><p>Return a zero matrix of size <em>dimx</em> x <em>dimy</em>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -187,7 +196,7 @@ these systems can be found through simple gaussian elimination.</p>
                         title="previous chapter">Welcome to JKal-Filter&#8217;s documentation!</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="filter.html"
-                        title="next chapter">filter</a></p>
+                        title="next chapter">2. filter</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/matrix.txt"
@@ -220,7 +229,7 @@ these systems can be found through simple gaussian elimination.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="filter.html" title="filter"
+          <a href="filter.html" title="2. filter"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to JKal-Filter’s documentation!"
@@ -230,7 +239,7 @@ these systems can be found through simple gaussian elimination.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2014, jepio.
-      Last updated on Jul 24, 2014.
+      Last updated on Jul 30, 2014.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

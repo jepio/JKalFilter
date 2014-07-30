@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>filter &mdash; JKal-Filter 0.1 documentation</title>
+    <title>2. filter &mdash; JKal-Filter 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -27,7 +27,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="JKal-Filter 0.1 documentation" href="index.html" />
-    <link rel="prev" title="matrix" href="matrix.html" /> 
+    <link rel="prev" title="1. matrix" href="matrix.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,7 +40,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="matrix.html" title="matrix"
+          <a href="matrix.html" title="1. matrix"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">JKal-Filter 0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -52,19 +52,19 @@
           <div class="body">
             
   <div class="section" id="module-filter">
-<span id="filter"></span><h1>filter<a class="headerlink" href="#module-filter" title="Permalink to this headline">¶</a></h1>
+<span id="filter"></span><h1>2. filter<a class="headerlink" href="#module-filter" title="Permalink to this headline">¶</a></h1>
 <p>Kalman Filter module</p>
 <dl class="class">
 <dt id="filter.LKFilter">
-<em class="property">class </em><tt class="descclassname">filter.</tt><tt class="descname">LKFilter</tt><big>(</big><em>_A</em>, <em>_H</em>, <em>_x</em>, <em>_P</em>, <em>_Q</em>, <em>_R</em><big>)</big><a class="reference internal" href="_modules/filter.html#LKFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#filter.LKFilter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">filter.</tt><tt class="descname">LKFilter</tt><big>(</big><em>A</em>, <em>H</em>, <em>x</em>, <em>P</em>, <em>Q</em>, <em>R</em><big>)</big><a class="reference internal" href="_modules/filter.html#LKFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#filter.LKFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Linear Kalman Filter implementation.</p>
 <p>For more details on this implementation go to:
 <a class="reference external" href="http://greg.czerniak.info/guides/kalman1/">http://greg.czerniak.info/guides/kalman1/</a></p>
 <dl class="method">
 <dt id="filter.LKFilter.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>_A</em>, <em>_H</em>, <em>_x</em>, <em>_P</em>, <em>_Q</em>, <em>_R</em><big>)</big><a class="reference internal" href="_modules/filter.html#LKFilter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#filter.LKFilter.__init__" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">__init__</tt><big>(</big><em>A</em>, <em>H</em>, <em>x</em>, <em>P</em>, <em>Q</em>, <em>R</em><big>)</big><a class="reference internal" href="_modules/filter.html#LKFilter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#filter.LKFilter.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the Kalman Filter matrices. This implementation skips the
-control input. Symbols used:</p>
+control input vector. Symbols used:</p>
 <ul class="simple">
 <li>A - state transition matrix - predict next state from current one</li>
 <li>H - measurement matrix, calculate measurement from the state</li>
@@ -77,9 +77,24 @@ control input. Symbols used:</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="filter.LKFilter.add_meas">
+<tt class="descname">add_meas</tt><big>(</big><em>measurements</em><big>)</big><a class="reference internal" href="_modules/filter.html#LKFilter.add_meas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#filter.LKFilter.add_meas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign measurements to the Kalman Filter object. Necessary for
+iteration, does nothing if invoking <a class="reference internal" href="#filter.LKFilter.step" title="filter.LKFilter.step"><tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt></a> by hand.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="filter.LKFilter.get_state">
 <tt class="descname">get_state</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/filter.html#LKFilter.get_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#filter.LKFilter.get_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return current state vector and state covariance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="filter.LKFilter.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/filter.html#LKFilter.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#filter.LKFilter.next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the next iteration of the Kalman Filter. Requires that the
+list of measurements be assigned to the filter first via
+<a class="reference internal" href="#filter.LKFilter.add_meas" title="filter.LKFilter.add_meas"><tt class="xref py py-meth docutils literal"><span class="pre">add_meas()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -120,7 +135,7 @@ be inverted.</p>
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="matrix.html"
-                        title="previous chapter">matrix</a></p>
+                        title="previous chapter">1. matrix</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/filter.txt"
@@ -153,14 +168,14 @@ be inverted.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="matrix.html" title="matrix"
+          <a href="matrix.html" title="1. matrix"
              >previous</a> |</li>
         <li><a href="index.html">JKal-Filter 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, jepio.
-      Last updated on Jul 24, 2014.
+      Last updated on Jul 30, 2014.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

@@ -4,3 +4,5 @@ matrix
 
 .. automodule:: matrix
    :exclude-members: __dict__,__weakref__
+   :no-private-members:
+   :no-special-members:
