@@ -1,6 +1,7 @@
 """ Module implementing the detector and detector response system. """
 # pylint: disable=C0103,R0913,W0613,W0201
 import math
+from track import *
 from matplotlib import pyplot as plt
 
 
@@ -128,6 +129,15 @@ class LayeredDetector(Detector):
         for layer in self.layers:
             layer.clear_hits()
         self.hits = 0
+
+    def propagate_track(self, track):
+        """ Propagate track through detector, leaving hits in strips. """
+        assert isinstance(track, Track)
+        # Sort layers according to x position (just in case)
+        for layer in sorted(self.layers, key=lambda i: i.pos()[0]):
+            x, _ = layer.pos()
+            y = track.get_yintercept(x)
+            layer.hit(x, y)
 
 
 def main():
