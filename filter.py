@@ -32,7 +32,7 @@ class LKFilter(object):
         self.Q = Q
         self.R = R
         self.I = Matrix.identity(max(x.size()))
-        self.measurements = None
+        self.measurements = []
 
     def get_state(self):
         """ Return current state vector and state covariance. """
@@ -77,7 +77,7 @@ class LKFilter(object):
         self.measurements = measurements
 
     def __iter__(self):
-        if self.measurements is None:
+        if self.measurements == []:
             raise StopIteration
         else:
             return self
@@ -89,11 +89,8 @@ class LKFilter(object):
         :py:meth:add_meas.
         """
         try:
-            current = self.measurements[0]
+            current = self.measurements.pop(0)
             ret = self.step(current)
-            del self.measurements[0]
             return ret
         except IndexError:
-            # Remove remaining measurements.
-            self.measurements = None
             raise StopIteration
