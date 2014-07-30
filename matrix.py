@@ -267,7 +267,7 @@ class Matrix(object):
         except ZeroDivisionError:
             print "Matrix is not invertible"
         # Undo the pivoting
-        if P == None:
+        if P is None:
             return inverted
         else:
             return inverted * P
