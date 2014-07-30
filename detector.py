@@ -56,7 +56,7 @@ class Layer(Detector):
         # Create strips for this layer
         self.strips = [None for _ in xrange(num_strips)]
         for i in xrange(num_strips):
-            new_y = bottom + i * step
+            new_y = bottom + (i + 0.5) * step
             self.strips[i] = Strip(x, new_y, step, parent=self)
 
         self.hit_strips = []
@@ -72,7 +72,8 @@ class Layer(Detector):
         # Increment the proper strip and add strip to hit_strips list
         num_strip = math.floor((y - self.bottom) / self.strip_height)
         self.strips[num_strip].hit(x, y)
-        self.hit_strips.append(self.strips[num_strip])
+        if self.strips[num_strip] not in self.hit_strips:
+            self.hit_strips.append(self.strips[num_strip])
 
 
 class LayeredDetector(Detector):
