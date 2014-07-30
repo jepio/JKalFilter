@@ -1,7 +1,8 @@
 """ Module implementing the detector and detector response system. """
-# pylint: disable=C0103,R0913,W0613
+# pylint: disable=C0103,R0913,W0613,W0201
 import math
 from matplotlib import pyplot as plt
+
 
 class Detector(object):
 
@@ -24,6 +25,10 @@ class Detector(object):
     def pos(self):
         """ Get the position of the detector. """
         return (self.x, self.y)
+
+    def clear_hits(self):
+        """ Clear hits from detector """
+        self.hits = 0
 
 
 class Strip(Detector):
@@ -75,6 +80,12 @@ class Layer(Detector):
         if self.strips[num_strip] not in self.hit_strips:
             self.hit_strips.append(self.strips[num_strip])
 
+    def clear_hits(self):
+        for strip in self.hit_strips:
+            strip.clear_hits()
+        self.hit_strips = []
+        self.hits = 0
+
 
 class LayeredDetector(Detector):
 
@@ -104,6 +115,11 @@ class LayeredDetector(Detector):
         plt.title("Layered Detector")
         plt.show()
 
+    def clear_hits(self):
+        for layer in self.layers:
+            layer.clear_hits()
+        self.hits = 0
+
 
 def main():
     """ Test if construction of detector works. """
@@ -112,4 +128,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
