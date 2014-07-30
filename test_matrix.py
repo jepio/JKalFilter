@@ -93,10 +93,10 @@ class TestMatrixFunctions(unittest.TestCase):
         self.matrix = matrix.Matrix()
         array = [[1, 0, 4], [2, 5, 0], [1, 5, 2]]
         self.matrix.value = array
-        L, U = self.matrix.LU()
-        self.assertEqual(self.matrix, L * U)
+        P, L, U = self.matrix.LU()
+        self.assertEqual(P * self.matrix, L * U)
         self.matrix = matrix.Matrix.identity(10)
-        L, U = self.matrix.LU()
+        P, L, U = self.matrix.LU()
         self.assertEqual(self.matrix, L)
         self.assertEqual(self.matrix, U)
         self.assertEqual(self.matrix, L * U)

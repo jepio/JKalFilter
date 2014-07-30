@@ -204,6 +204,25 @@ class Matrix(object):
         return Matrix(new)
 
     # Special functions
+    def pivotize(self):
+        """
+        Return the pivoting matrix :math:`P` that rearranges the rows of
+        matrix :math:`M` such that the largest element in each column gets
+        placed on the diagonal. To make use of the pivoting matrix perform
+        leftside matrix multiplication:
+
+        .. math::
+            M^' = P M
+
+        """
+        dim, _ = self.size()
+        P = Matrix.identity(dim)
+        for j in range(dim):
+            row = max(range(j, dim), key=lambda i: abs(self[i][j]))
+            if j != row:
+                P.value[j], P.value[row] = P.value[row], P.value[j]
+        return P
+
     def LU(self):
         """
         Return the LU decomposition of matrix, that is matrices :math:`L` and
@@ -211,31 +230,36 @@ class Matrix(object):
         decomposition method, described at
         http://en.wikipedia.org/wiki/Crout_matrix_decomposition
 
-        The input matrix needs to be square.
+        The input matrix needs to be square and the decomposition is actually
+        performed on the pivoted matrix P*self.
         """
         dimx, dimy = self.size()
         if dimx != dimy:
             raise ValueError("Matrix is not square")
         dim = dimx
+        P = self.pivotize()
+        pivoted_self = P * self
         L = Matrix.zero(dim, dim)
         U = Matrix.identity(dim)
+
         for i in range(dim):
             for j in range(i, dim):
                 tot = 0.0
                 for k in range(i):
                     tot += L[j][k] * U[k][i]
-                L[j][i] = self[j][i] - tot
+                L[j][i] = pivoted_self[j][i] - tot
             for j in range(i, dim):
                 tot = 0.0
                 for k in range(i):
                     tot += L[i][k] * U[k][j]
                 if L[i][i] == 0:
-                    L[i][i] = 1e-20
-                U[i][j] = (self[i][j] - tot) / L[i][i]
-        return (L, U)
+                    L[i][i] = 1e-40
+                U[i][j] = (pivoted_self[i][j] - tot) / L[i][i]
+
+        return (P, L, U)
 
     @staticmethod
-    def LUInvert(L, U):
+    def LUInvert(P, L, U):
         """
         Return the inverse matrix of :math:`A = LU` where :math:`L, U`
         are the LU decomposition matrices.
@@ -262,6 +286,10 @@ class Matrix(object):
         :math:`x`. Since :math:`L` and :math:`U` are both triangular matrices,
         the solution of these systems can be found through simple gaussian
         elimination.
+
+        In the final step the inverse matrix :math:`X` is multiplied from the
+        rightside with the pivoting matrix, to undo the pivoting. If you do
+        not want pivoting, pass None as P.
         """
 
         dim, _ = L.size()
@@ -285,15 +313,18 @@ class Matrix(object):
                     col_x[j] = (col_y[j] - rest) / U[j][j]
                     inverted[j][i] = col_x[j]
                 # inverted[i] = col_y # <-- needs a __set_item__ method
-            return inverted
         except ZeroDivisionError:
             print "Matrix is not invertible"
-            return None
+        # Undo the pivoting
+        if P is None:
+            return inverted
+        else:
+            return inverted * P
 
     def _inverse(self):
         """ Return the inverse matrix. """
-        L, U = self.LU()
-        new = Matrix.LUInvert(L, U)
+        P, L, U = self.LU()
+        new = Matrix.LUInvert(P, L, U)
         return new
 
     @property
