@@ -73,7 +73,8 @@ class Layer(Detector):
         if self.x != x:
             return
         # Needs to be this way for the rare case where y == self.top, because
-        # I'm going to use floor
+        # I'm going to use floor (without the equals sign it would attempt to
+        # hit the non-existant detector above).
         if y >= self.top or y < self.bottom:
             return
         super(Layer, self).hit(x, y)
@@ -109,6 +110,7 @@ class LayeredDetector(Detector):
         y = []
         hits_x = []
         hits_y = []
+        hit_mult = []
         for layer in self.layers:
             for strip in layer.strips:
                 temp_x, temp_y = strip.pos()
@@ -116,10 +118,15 @@ class LayeredDetector(Detector):
                 y.append(temp_y)
             for strip in layer.hit_strips:
                 temp_x, temp_y = strip.pos()
+                mulitplicity = strip.hits
                 hits_x.append(temp_x)
                 hits_y.append(temp_y)
-        print zip(x, y)
-        print zip(hits_x, hits_y)
+                hit_mult.append(mulitplicity)
+
+        print "Detector positions:"
+        print '\n'.join(map(str, zip(x, y)))
+        print "Hit positions:"
+        print '\n'.join(map(str, zip(hits_x, hits_y, hit_mult)))
         plt.scatter(x, y, color='b')
         plt.scatter(hits_x, hits_y, color='r')
         plt.title("Layered Detector")
