@@ -78,3 +78,4 @@ if __name__ == "__main__":
         funcs[sys.argv[1]](int(sys.argv[2]))
     else:
         print("USAGE: test_filter function_num num_iterations")
+        print("Functions: " + str(funcs))
