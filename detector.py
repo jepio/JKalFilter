@@ -123,8 +123,8 @@ class LayeredDetector(Detector):
                 hits_y.append(temp_y)
                 hit_mult.append(mulitplicity)
 
-        print "Detector positions:"
-        print '\n'.join(map(str, zip(x, y)))
+        #print "Detector positions:"
+        #print '\n'.join(map(str, zip(x, y)))
         print "Hit positions:"
         print '\n'.join(map(str, zip(hits_x, hits_y, hit_mult)))
         plt.scatter(x, y, color='b')
