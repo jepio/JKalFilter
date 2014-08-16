@@ -136,3 +136,5 @@ class TwoWayLKFilter(LKFilter):
                 raise StopIteration
             # reverse the transition matrix.
             self.A = self.A.I
+            # resume iteration
+            return self.next()
