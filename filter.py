@@ -1,6 +1,7 @@
 """ Kalman Filter module """
 # pylint: disable=C0103,R0192
 from matrix import Matrix
+import collections
 
 
 class LKFilter(object):
@@ -94,3 +95,44 @@ class LKFilter(object):
             return ret
         except IndexError:
             raise StopIteration
+
+
+class TwoWayLKFilter(LKFilter):
+    """A bidirectional Kalman Filter: the measurements will be iterated in both
+    directions starting from the last measurements. This allows the filter to
+    achieve a higher precision of estimation."""
+
+    def add_meas(self, measurements):
+        """Assign measurements to filter."""
+        self.reverse_measurements = collections.deque(measurements)
+        self.measurements = collections.deque(reversed(measurements))
+
+    def __iter__(self):
+        if not self.measurements:
+            raise StopIteration
+        else:
+            # first iterating backwards, so need inverse transition
+            # matrix
+            self.A = self.A.I
+            return self
+
+    def next(self):
+        """Return the next iteration of the two-way Kalman Filter. First
+        iterates over the measurements in reverse and then in the proper
+        direction."""
+        try:
+            current = self.reverse_measurements.pop()
+            ret = self.step(current)
+            return ret
+        except IndexError:
+            # Finished iterating from the back, now time for forward.
+            # iteration.
+            # Exchange the measurements that are being iterated over.
+            self.reverse_measurements, self.measurements = (
+                self.measurements, self.reverse_measurements)
+            # if reverse_measurements is now empty it means we already iterated
+            # forward, stop iteration.
+            if len(self.reverse_measurements) == 0:
+                raise StopIteration
+            # reverse the transition matrix.
+            self.A = self.A.I
