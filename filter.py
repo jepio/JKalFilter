@@ -115,13 +115,24 @@ class TwoWayLKFilter(LKFilter):
         self.reverse_measurements = collections.deque(measurements)
         self.measurements = collections.deque(reversed(measurements))
 
+    def reverse(self):
+        """Reverse the direction in which the filter is currently iterating."""
+        self.A = self.A.I
+        # Flag that reflects whether the filter is currently iterating forward
+        # or in reverse.
+        try:
+            self.rev = not self.rev
+        except NameError:
+            # if this is the first time this is run revers will not be defined.
+            self.rev = True
+
     def __iter__(self):
         if not self.measurements:
             raise StopIteration
         else:
             # first iterating backwards, so need inverse transition
             # matrix
-            self.A = self.A.I
+            self.reverse()
             return self
 
     def next(self):
@@ -142,7 +153,6 @@ class TwoWayLKFilter(LKFilter):
             # forward, stop iteration.
             if len(self.reverse_measurements) == 0:
                 raise StopIteration
-            # reverse the transition matrix.
-            self.A = self.A.I
+            self.reverse()
             # resume iteration
             return self.next()
