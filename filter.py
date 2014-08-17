@@ -33,7 +33,8 @@ class LKFilter(object):
         self.Q = Q
         self.R = R
         self.I = Matrix.identity(max(x.size()))
-        self.measurements = []
+        self.measurements = None
+        self.counter = None
 
     @property
     def state(self):
@@ -62,7 +63,7 @@ class LKFilter(object):
         self.x = self.A * self.x
         self.P = self.A * self.P * self.A.T + self.Q
 
-    def step(self, measurement=None):
+    def step(self, measurement=None, add=False):
         """
         Perform one iteration of the Kalman Filter:
 
@@ -76,6 +77,16 @@ class LKFilter(object):
             # if measurement has not been supplied no update will be performed
             self.update(measurement)
         self.predict()
+
+        try:
+            self.counter += 1
+        except TypeError:
+            self.counter = 0
+
+        # Keep track of measurements that have been used by this filter
+        if add:
+            self.measurements.append(measurement)
+
         return self.state
 
     def add_meas(self, measurements):
@@ -86,7 +97,7 @@ class LKFilter(object):
         self.measurements = measurements
 
     def __iter__(self):
-        if self.measurements == []:
+        if not self.measurements:
             raise StopIteration
         else:
             return self
