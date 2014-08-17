@@ -34,7 +34,7 @@ class FitManager(object):
                     # thanks to this the becomes decoupled from the others
                     kfilter.state = state, cov
                     self.fitters.append(kfilter)
-                    kfilter.step()
+                    kfilter.step(add=True)
                     layer.clear_hits()
 
     def fit(self):
@@ -59,11 +59,11 @@ class FitManager(object):
                 # allow for 3 sigma distance (remember y_err is variance)
                 if (measured_y - y) ** 2 > 9 * y_err:
                     # step ignoring the measurement
-                    fitter.step()
+                    fitter.step(add=True)
                     continue
                 else:
                     measurement = Matrix([[measured_y]])
-                    fitter.step(measurement)
+                    fitter.step(measurement, add=True)
                     # decrement the amount of hits in strip or remove strip
                     # from hit_strips
                     if strip.hits == 1:

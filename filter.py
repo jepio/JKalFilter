@@ -85,8 +85,10 @@ class LKFilter(object):
 
         # Keep track of measurements that have been used by this filter
         if add:
-            self.measurements.append(measurement)
-
+            try:
+                self.measurements.append(measurement)
+            except AttributeError:
+                self.measurements = [measurement]
         return self.state
 
     def add_meas(self, measurements):
