@@ -109,6 +109,15 @@ class LayeredDetector(Detector):
             new_x = x + i * x_step
             self.layers[i] = Layer(new_x, y, height, num_strips, parent=self)
 
+    def get_layers(self, reverse=False):
+        """Return the layers in the detector."""
+        # layers are sorted by x position
+        layers = sorted(self.layers, key=lambda i: i.pos()[0])
+        if reverse:
+            layers = reversed(layers)
+        for layer in layers:
+            yield layer
+
     def draw(self):
         """ Draw the detector with points in each strip center. """
         x = []
@@ -116,7 +125,7 @@ class LayeredDetector(Detector):
         hits_x = []
         hits_y = []
         hit_mult = []
-        for layer in self.layers:
+        for layer in self.get_layers():
             for strip in layer.strips:
                 temp_x, temp_y = strip.pos()
                 x.append(temp_x)
@@ -138,7 +147,7 @@ class LayeredDetector(Detector):
         plt.show()
 
     def clear_hits(self):
-        for layer in self.layers:
+        for layer in self.get_layers():
             layer.clear_hits()
         self.hits = 0
 
@@ -146,7 +155,7 @@ class LayeredDetector(Detector):
         """ Propagate track through detector, leaving hits in strips. """
         assert isinstance(track, Track)
         # Sort layers according to x position (just in case)
-        for layer in sorted(self.layers, key=lambda i: i.pos()[0]):
+        for layer in self.get_layers():
             x, _ = layer.pos()
             y = track.get_yintercept(x)
             layer.hit(x, y)
