@@ -122,7 +122,7 @@ class TwoWayLKFilter(LKFilter):
         # or in reverse.
         try:
             self.rev = not self.rev
-        except NameError:
+        except AttributeError:
             # if this is the first time this is run revers will not be defined.
             self.rev = True
 
