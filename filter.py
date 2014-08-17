@@ -62,7 +62,7 @@ class LKFilter(object):
         self.x = self.A * self.x
         self.P = self.A * self.P * self.A.T + self.Q
 
-    def step(self, measurement):
+    def step(self, measurement=None):
         """
         Perform one iteration of the Kalman Filter:
 
@@ -72,7 +72,9 @@ class LKFilter(object):
         Depending on what is expected the order of these operations can also
         be inverted.
         """
-        self.update(measurement)
+        if measurement is not None:
+            # if measurement has not been supplied no update will be performed
+            self.update(measurement)
         self.predict()
         return self.state
 
