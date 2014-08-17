@@ -35,9 +35,15 @@ class LKFilter(object):
         self.I = Matrix.identity(max(x.size()))
         self.measurements = []
 
-    def get_state(self):
+    @property
+    def state(self):
         """ Return current state vector and state covariance. """
         return (self.x, self.P)
+
+    @state.setter
+    def state(self, new_state):
+        """ Manually set current state along with its covariance. """
+        self.x, self.P = new_state
 
     def update(self, measurement):
         """ Update current state using the measurement. """
@@ -68,7 +74,7 @@ class LKFilter(object):
         """
         self.update(measurement)
         self.predict()
-        return self.get_state()
+        return self.state
 
     def add_meas(self, measurements):
         """
