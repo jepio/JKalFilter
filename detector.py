@@ -97,7 +97,12 @@ class LayeredDetector(Detector):
 
     def __init__(self, x, y, height, length, num_layers, num_strips):
         super(LayeredDetector, self).__init__(x, y)
-        x_step = float(length) / num_layers
+        try:
+            x_step = float(length) / (num_layers - 1)
+        except ZeroDivisionError:
+            # If number of layers is 1 it means only one layer is going to be
+            # created
+            x_step = 0
         self.layers = [None for _ in xrange(num_layers)]
 
         for i in xrange(num_layers):
