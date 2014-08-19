@@ -4,25 +4,16 @@ import random
 import math
 
 
-def unimplemented(function):
-    def decorated_func(*ar, **kw):
-        raise AttributeError(
-            "Unimplemented abstract method " + function.__name__)
-    return decorated_func
-
-
 class Track(object):
 
     """ A track interface. """
 
-    @unimplemented
     def __init__(self):
-        pass
+        raise NotImplementedError
 
-    @unimplemented
     def get_yintercept(self, x):
         """ Return y intercept of track with detector. """
-        pass
+        raise NotImplementedError
 
 
 class LineTrack(Track):
@@ -48,6 +39,6 @@ def gen_straight_tracks(N=10):
         b = 0.2 * (b - 0.5)
         # generate a of track so that the angles are uniform from 15 degrees to
         # -15 degrees.
-        a = math.tan(math.pi/6 * (a - 0.5))
+        a = math.tan(math.pi / 6 * (a - 0.5))
         tracks[i] = LineTrack(a, b)
     return tracks
