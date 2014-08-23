@@ -1,5 +1,5 @@
 """ Module implementing the detector and detector response system. """
-# pylint: disable=C0103,R0913,W0613,W0201
+# pylint: disable=C0103,R0913,W0613,W0201,W0141
 import math
 from track import Track
 from matplotlib import pyplot as plt
@@ -71,12 +71,14 @@ class Layer(Detector):
     def hit(self, x, y):
         """ Increment the hit amount in the correct strip. """
         if self.x != x:
-            return
+            raise RuntimeError("Wrong x of layer")
         # Needs to be this way for the rare case where y == self.top, because
         # I'm going to use floor (without the equals sign it would attempt to
         # hit the non-existant detector above).
         if y >= self.top or y < self.bottom:
             return
+        # Increment hits in parent(LayeredDetector) and self
+        self.parent.hit(None, None)
         super(Layer, self).hit(x, y)
         # Increment the proper strip and add strip to hit_strips list
         num_strip = int(math.floor((y - self.bottom) / self.strip_height))
