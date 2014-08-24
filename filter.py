@@ -73,6 +73,15 @@ class LKFilter(object):
         Depending on what is expected the order of these operations can also
         be inverted.
         """
+        # Keep track of measurements that have been used by this filter
+        if add:
+            try:
+                self.measurements.append(measurement)
+            except AttributeError:
+                # Means this is the first iteration, initial state should be
+                # added to measurement list
+                self.measurements = [Matrix([self.state[0][0]])]  # ugly, TODO
+
         if measurement is not None:
             # if measurement has not been supplied no update will be performed
             self.update(measurement)
@@ -83,12 +92,6 @@ class LKFilter(object):
         except TypeError:
             self.counter = 0
 
-        # Keep track of measurements that have been used by this filter
-        if add:
-            try:
-                self.measurements.append(measurement)
-            except AttributeError:
-                self.measurements = [measurement]
         return self.state
 
     def add_meas(self, measurements):
