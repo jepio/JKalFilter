@@ -6,6 +6,7 @@ from track import gen_straight_tracks
 from matplotlib import pyplot as plt
 from fitter import FitManager
 from filter import TwoWayLKFilter
+plt.ion()
 
 
 def main():
@@ -13,7 +14,7 @@ def main():
     Lx = 8
     Ly = 0.5
     # number of layers/strips
-    Nx = 10
+    Nx = 9
     Ny = 25
     # y error (uniform)
     y_err = (Ly / Ny) / 12 ** 0.5
@@ -39,13 +40,16 @@ def main():
     Q = Matrix([[0.01, 0.0],
                 [0.0, 0.01]])
     R = Matrix([[1.0]])
-    x = Matrix([[0,0]]).T
+    # dummy measurement - filter needs to know the shape of measurements
+    x = Matrix([[0, 0]]).T
     kal_filter = TwoWayLKFilter(A, H, x, None, Q, R)
     fitter = FitManager(detector, kal_filter)
     fitters = fitter.fit()
+    print "\nFits:\n======================="
     for i in fitters:
-        print '\n'.join(map(str, i.state))
-
+        print i.state[0], len(i.measurements)
+        print i.measurements
 
 if __name__ == "__main__":
     main()
+    raw_input()
