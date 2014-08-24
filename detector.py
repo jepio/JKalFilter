@@ -141,7 +141,7 @@ class LayeredDetector(Detector):
 
         #print "Detector positions:"
         #print '\n'.join(map(str, zip(x, y)))
-        print "Hit positions:"
+        print "\nHit positions:\n======================="
         print '\n'.join(map(str, zip(hits_x, hits_y, hit_mult)))
         plt.scatter(x, y, color='b')
         plt.scatter(hits_x, hits_y, color='r')
