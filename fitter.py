@@ -31,11 +31,12 @@ class FitManager(object):
                     state = Matrix([[y, y / x]]).T
                     cov = Matrix([[10.0, 0.0],
                                   [0.0, 10.0]])
-                    # thanks to this the becomes decoupled from the others
+                    # thanks to this the filter becomes decoupled from the
+                    # original
                     kfilter.state = state, cov
                     self.fitters.append(kfilter)
                     kfilter.step(add=True)
-                    layer.clear_hits()
+        layer.clear_hits()
 
     def fit(self):
         """Perform a fit of the hits in the detector using the supplied
