@@ -14,12 +14,11 @@ def main():
     Lx = 8
     Ly = 0.5
     # number of layers/strips
-    Nx = 9
-    Ny = 25
+    Nx = 15
+    Ny = 50
     # y error (uniform)
     y_err = (Ly / Ny) / 12 ** 0.5
     dx = float(Lx) / (Nx - 1)
-
     detector = LayeredDetector(1, 0, 0.5, Lx, Nx, 25)
     tracks = gen_straight_tracks(10)
     x_coords = [0.1 * i for i in xrange(100)]
@@ -29,7 +28,7 @@ def main():
         plt.plot(x_coords, y)
     plt.xlim(0, 10)
     plt.ylim(-0.5, 0.5)
-    detector.draw()
+    detector.draw(True)
 
     # measurement matrix
     H = Matrix([[1.0, 0.0]])
@@ -37,19 +36,23 @@ def main():
     A = Matrix([[1.0,  dx],
                 [0.0, 1.0]])
     # process error
-    Q = Matrix([[0.01, 0.0],
-                [0.0, 0.01]])
-    R = Matrix([[1.0]])
+    Q = Matrix([[0.0001, 0.0],
+                [0.0, 0.0001]])
+    R = Matrix([[y_err]])
     # dummy measurement - filter needs to know the shape of measurements
     x = Matrix([[0, 0]]).T
     kal_filter = TwoWayLKFilter(A, H, x, None, Q, R)
     fitter = FitManager(detector, kal_filter)
     fitters = fitter.fit()
-    print "\nFits:\n======================="
-    for i in fitters:
-        if len(i.measurements) < 3: continue
-        print i.state[0], len(i.measurements)
-        print i.measurements
+
+    print "\nFitted hits:\n======================="
+    for filt in fitters:
+        print filt.measurements_list
+
+    track_coordinates = fitter.propagate_tracks()
+    for track in track_coordinates:
+        x, y = zip(*track)
+        plt.plot(x,y)
 
 if __name__ == "__main__":
     main()
