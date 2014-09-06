@@ -46,6 +46,11 @@ class LKFilter(object):
         """ Manually set current state along with its covariance. """
         self.x, self.P = new_state
 
+    @property
+    def measurements_list(self, digits=5):
+        """Return 1D measurements in list instead of matrix form."""
+        return [round(x[0][0], digits) for x in self.measurements]
+
     def update(self, measurement):
         """ Update current state using the measurement. """
         if measurement.size() != (self.H * self.x).size():
