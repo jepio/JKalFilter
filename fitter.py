@@ -86,10 +86,21 @@ class FitManager(object):
         for fitter in self.fitters:
             estimates = []
             fitter.reverse()
-            current_x = start_x
+            current_x = start_x - x_step
+            # state vector, then position in state vector
+            current_y = fitter.state[0][0][0]
+            # initial coordinates
+            estimates.append((current_x, current_y))
+
             for state, _ in fitter:
                 current_y = state[0][0]  # col. vect: contains y and y'
-                estimates.append((current_x, current_y))
                 current_x += x_step
+                estimates.append((current_x, current_y))
+
+            # one extra iteration at the end
+            current_x += x_step
+            current_y = fitter.step()[0][0][0]
+            estimates.append((current_x, current_y))
+
             result.append(estimates)
         return result
