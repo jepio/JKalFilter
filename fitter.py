@@ -49,16 +49,16 @@ class FitManager(object):
         # Procedure for the remaining layers
         for layer in layers:
             for fitter in self.fitters:
-                state, P = fitter.state
-                y = state[0][0]
-                y_err = P[0][0]
+                state, cov_matrix = fitter.state
+                predicted_y = state[0][0]
+                y_err = cov_matrix[0][0]
                 # find the strip that minimizes the distance to the predicted
                 # position y position
                 strip = min(layer.hit_strips, key=
-                            lambda strip: abs(y - strip.pos()[1]))
+                            lambda strip: abs(predicted_y - strip.pos()[1]))
                 measured_y = strip.pos()[1]
                 # allow for 3 sigma distance (remember y_err is variance)
-                if (measured_y - y) ** 2 > 9 * y_err:
+                if (measured_y - predicted_y) ** 2 > 9 * y_err:
                     # step ignoring the measurement
                     fitter.step(add=True)
                     continue
