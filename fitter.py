@@ -24,18 +24,18 @@ class FitManager(object):
         filters."""
         for strip in layer.hit_strips:
             for i in xrange(strip.hits):
-                    # Create a copy of the filter (all the same matrices)
-                    kfilter = copy(self.filt)
-                    x, y = strip.pos()
-                    # initialize with first hit
-                    state = Matrix([[y, y / x]]).T
-                    cov = Matrix([[10.0, 0.0],
-                                  [0.0, 10.0]])
-                    # thanks to this the filter becomes decoupled from the
-                    # original
-                    kfilter.state = state, cov
-                    self.fitters.append(kfilter)
-                    kfilter.step(add=True)
+                # Create a copy of the filter (all the same matrices)
+                kfilter = copy(self.filt)
+                x, y = strip.pos()
+                # initialize with first hit
+                state = Matrix([[y, y / x]]).T
+                cov = Matrix([[10.0, 0.0],
+                              [0.0, 10.0]])
+                # thanks to this the filter becomes decoupled from the
+                # original
+                kfilter.state = state, cov
+                self.fitters.append(kfilter)
+                kfilter.step(add=True)
         layer.clear_hits()
 
     def fit(self):
