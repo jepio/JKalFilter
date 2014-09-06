@@ -14,7 +14,7 @@ class FitManager(object):
     def __init__(self, det_obj, filt_obj):
         assert isinstance(det_obj, Detector)
         assert isinstance(filt_obj, TwoWayLKFilter)
-        self.detect = det_obj
+        self.detector = det_obj
         self.filt = filt_obj
         filt_obj.reverse()
         self.fitters = []
@@ -41,7 +41,7 @@ class FitManager(object):
     def fit(self):
         """Perform a fit of the hits in the detector using the supplied
         Kalman Filter."""
-        layers = self.detect.get_layers(reverse=True)
+        layers = self.detector.get_layers(reverse=True)
         # special procedure for first layer
         layer = next(layers)
         self._new_filters(layer)
