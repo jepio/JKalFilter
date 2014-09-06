@@ -131,7 +131,7 @@ class LayeredDetector(Detector):
         for layer in layers:
             yield layer
 
-    def draw(self):
+    def draw(self, rounding=False):
         """ Draw the detector with points in each strip center. """
         x = []
         y = []
@@ -146,6 +146,9 @@ class LayeredDetector(Detector):
             for strip in layer.hit_strips:
                 temp_x, temp_y = strip.pos()
                 mulitplicity = strip.hits
+                if rounding:
+                    temp_x = round(temp_x,5)
+                    temp_y = round(temp_y,5)
                 hits_x.append(temp_x)
                 hits_y.append(temp_y)
                 hit_mult.append(mulitplicity)
