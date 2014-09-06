@@ -23,8 +23,8 @@ def main():
     detector = LayeredDetector(1, 0, 0.5, Lx, Nx, 25)
     tracks = gen_straight_tracks(10)
     x_coords = [0.1 * i for i in xrange(100)]
-    for i, track in enumerate(tracks):
-        detector.propagate_track(track)
+    detector.propagate_tracks(tracks)
+    for track in tracks:
         y = [track.get_yintercept(x) for x in x_coords]
         plt.plot(x_coords, y)
     plt.xlim(0, 10)
@@ -47,6 +47,7 @@ def main():
     fitters = fitter.fit()
     print "\nFits:\n======================="
     for i in fitters:
+        if len(i.measurements) < 3: continue
         print i.state[0], len(i.measurements)
         print i.measurements
 

@@ -13,8 +13,8 @@ def main():
     A = LayeredDetector(1, 0, 0.5, 8, 10, 25)
     tracks = gen_straight_tracks(20)
     x_coords = [0.1 * i for i in xrange(100)]
-    for i, track in enumerate(tracks):
-        A.propagate_track(track)
+    A.propagate_tracks(tracks)
+    for track in tracks:
         y = [track.get_yintercept(x) for x in x_coords]
         plt.plot(x_coords, y)
     plt.xlim(0, 10)
