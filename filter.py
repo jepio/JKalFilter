@@ -128,7 +128,7 @@ class TwoWayLKFilter(LKFilter):
 
     def __init__(self, *arg, **kwg):
         super(TwoWayLKFilter, self).__init__(*arg, **kwg)
-        self.reverse_measurements = None
+        self.reverse_measurements = []
         # Flag that reflects whether filter is iterating forward or backward
         self.rev = False
 
