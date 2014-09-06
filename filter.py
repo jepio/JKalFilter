@@ -126,6 +126,12 @@ class TwoWayLKFilter(LKFilter):
     directions starting from the last measurements. This allows the filter to
     achieve a higher precision of estimation."""
 
+    def __init__(self, *arg, **kwg):
+        super(TwoWayLKFilter, self).__init__(*arg, **kwg)
+        self.reverse_measurements = None
+        # Flag that reflects whether filter is iterating forward or backward
+        self.rev = False
+
     def add_meas(self, measurements):
         """Assign measurements to filter."""
         self.reverse_measurements = collections.deque(measurements)
@@ -134,13 +140,7 @@ class TwoWayLKFilter(LKFilter):
     def reverse(self):
         """Reverse the direction in which the filter is currently iterating."""
         self.A = self.A.I
-        # Flag that reflects whether the filter is currently iterating forward
-        # or in reverse.
-        try:
-            self.rev = not self.rev
-        except AttributeError:
-            # if this is the first time this is run revers will not be defined.
-            self.rev = True
+        self.rev = not self.rev
 
     def __iter__(self):
         if not self.measurements:
