@@ -75,5 +75,6 @@ class FitManager(object):
             # assigned
             self._new_filters(layer)
 
+        self.fitters = [x for x in self.fitters if len(x.measurements) > 2]
         return self.fitters
 
