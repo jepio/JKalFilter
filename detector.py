@@ -154,10 +154,16 @@ class LayeredDetector(Detector):
         self.hits = 0
 
     def propagate_track(self, track):
-        """ Propagate track through detector, leaving hits in strips. """
+        """Propagate track through detector, leaving hits in strips."""
         assert isinstance(track, Track)
         # Sort layers according to x position (just in case)
         for layer in self.get_layers():
             x, _ = layer.pos()
             y = track.get_yintercept(x)
             layer.hit(x, y)
+
+    def propagate_tracks(self, tracks):
+        """Propagate all tracks from a list, leaving hits in the detector."""
+        assert isinstance(tracks, list)
+        for track in tracks:
+            self.propagate_track(track)
