@@ -78,3 +78,18 @@ class FitManager(object):
         self.fitters = [x for x in self.fitters if len(x.measurements) > 2]
         return self.fitters
 
+    def propagate_tracks(self):
+        """Propagate all fitted tracks."""
+        x_step = self.detector.x_step
+        start_x = self.detector.pos()[0]  # x position of left-most layer
+        result = []
+        for fitter in self.fitters:
+            estimates = []
+            fitter.reverse()
+            current_x = start_x
+            for state, _ in fitter:
+                current_y = state[0][0]  # col. vect: contains y and y'
+                estimates.append((current_x, current_y))
+                current_x += x_step
+            result.append(estimates)
+        return result
