@@ -106,13 +106,24 @@ class LayeredDetector(Detector):
             # created
             x_step = 0
         self.layers = [None for _ in xrange(num_layers)]
-
         for i in xrange(num_layers):
             new_x = x + i * x_step
             self.layers[i] = Layer(new_x, y, height, num_strips, parent=self)
 
+    @property
+    def x_step(self):
+        """Return x distance between layers."""
+        if len(self.layers) == 1:
+            return 0
+        # returns x position of a layer
+        fun = lambda layer: layer.pos()[0]
+        # distance between first two layers
+        x_step = fun(self.layers[1]) - fun(self.layers[0])
+        return x_step
+
+
     def get_layers(self, reverse=False):
-        """Return the layers in the detector."""
+        """Generate the layers in the detector."""
         # layers are sorted by x position
         layers = sorted(self.layers, key=lambda i: i.pos()[0])
         if reverse:
