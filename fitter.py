@@ -92,15 +92,17 @@ class FitManager(object):
             # initial coordinates
             estimates.append((current_x, current_y))
 
+            # One step needs to be performed since filter is set up to first
+            # update then predict.
+            state, _ = fitter.step(None)
+            current_y = state[0][0]
+            current_x += x_step
+            estimates.append((current_x, current_y))
+
             for state, _ in fitter:
                 current_y = state[0][0]  # col. vect: contains y and y'
                 current_x += x_step
                 estimates.append((current_x, current_y))
-
-            # one extra iteration at the end
-            current_x += x_step
-            current_y = fitter.step()[0][0][0]
-            estimates.append((current_x, current_y))
 
             result.append(estimates)
         return result
