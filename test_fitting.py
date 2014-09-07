@@ -12,22 +12,22 @@ plt.ion()
 def main():
     # length
     Lx = 8
-    Ly = 0.5
+    Ly = 2.5
     # number of layers/strips
     Nx = 15
     Ny = 50
     # y error (uniform)
     y_err = (Ly / Ny) / 12 ** 0.5
     dx = float(Lx) / (Nx - 1)
-    detector = LayeredDetector(1, 0, 0.5, Lx, Nx, 25)
+    detector = LayeredDetector(1, 0, Ly, Lx, Nx, Ny)
     tracks = gen_straight_tracks(10)
     x_coords = [0.1 * i for i in xrange(100)]
     detector.propagate_tracks(tracks)
     for track in tracks:
         y = [track.get_yintercept(x) for x in x_coords]
-        plt.plot(x_coords, y)
+        #plt.plot(x_coords, y)
     plt.xlim(0, 10)
-    plt.ylim(-0.5, 0.5)
+    plt.ylim(-1.5, 1.5)
     detector.draw(True)
 
     # measurement matrix
@@ -36,9 +36,9 @@ def main():
     A = Matrix([[1.0,  dx],
                 [0.0, 1.0]])
     # process error
-    Q = Matrix([[0.0001, 0.0],
-                [0.0, 0.0001]])
-    R = Matrix([[y_err]])
+    Q = Matrix([[0.00005, 0.0],
+                [0.0, 0.00005]])
+    R = Matrix([[1*y_err]])
     # dummy measurement - filter needs to know the shape of measurements
     x = Matrix([[0, 0]]).T
     kal_filter = TwoWayLKFilter(A, H, x, None, Q, R)
