@@ -12,15 +12,15 @@ plt.ion()
 def main():
     # length
     Lx = 8
-    Ly = 2.5
+    Ly = 1.0
     # number of layers/strips
     Nx = 15
-    Ny = 50
+    Ny = 25
     # y error (uniform)
-    y_err = (Ly / Ny) / 12 ** 0.5
+    y_err = Ly / (Ny * 12 ** 0.5)
     dx = float(Lx) / (Nx - 1)
     detector = LayeredDetector(1, 0, Ly, Lx, Nx, Ny)
-    tracks = gen_straight_tracks(10)
+    tracks = gen_straight_tracks(5)
     x_coords = [0.1 * i for i in xrange(100)]
     detector.propagate_tracks(tracks)
     for track in tracks:
