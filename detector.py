@@ -104,7 +104,7 @@ class LayeredDetector(Detector):
         except ZeroDivisionError:
             # If number of layers is 1 it means only one layer is going to be
             # created
-            x_step = 0
+            x_step = 0.0
         self.layers = [None for _ in xrange(num_layers)]
         for i in xrange(num_layers):
             new_x = x + i * x_step
