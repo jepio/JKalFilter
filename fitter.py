@@ -49,11 +49,16 @@ class FitManager(object):
         # Procedure for the remaining layers
         for layer in layers:
             for fitter in self.fitters:
+                # TODO: it is possible for too many fitters to be spawned,
+                # more than the available amount of measurements. This results
+                # in an exception in the min function.
+                # Fixes: try/except, or use the hungarian algorithm to assign
+                # measurements.
                 state, cov_matrix = fitter.state
                 predicted_y = state[0][0]
                 y_err = cov_matrix[0][0]
                 # find the strip that minimizes the distance to the predicted
-                # position y position
+                # y position
                 strip = min(layer.hit_strips, key=
                             lambda strip: abs(predicted_y - strip.pos()[1]))
                 measured_y = strip.pos()[1]
