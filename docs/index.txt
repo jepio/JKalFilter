@@ -15,8 +15,8 @@ Contents:
 
    matrix
    kfilter
-   detector
    track
+   detector
    fitter
 
 Indices and tables
