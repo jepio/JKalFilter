@@ -4,7 +4,7 @@ of the Kalman Filter.
 """
 from matrix import Matrix
 from detector import Detector
-from filter import TwoWayLKFilter
+from kfilter import TwoWayLKFilter
 from copy import copy
 
 

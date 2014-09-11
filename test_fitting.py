@@ -5,7 +5,7 @@ from detector import LayeredDetector
 from track import gen_straight_tracks
 from matplotlib import pyplot as plt
 from fitter import FitManager
-from filter import TwoWayLKFilter
+from kfilter import TwoWayLKFilter
 plt.ion()
 
 
