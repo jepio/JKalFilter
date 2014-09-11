@@ -1,6 +1,6 @@
 """
 Fitting module: fit tracks to hits contained within a detector with the help
-of the Kalman Filter.
+of Kalman Filters.
 """
 from matrix import Matrix
 from detector import Detector
@@ -9,7 +9,19 @@ from copy import copy
 
 
 class FitManager(object):
-    """A class that manages the fitting process."""
+    """A class that manages the fitting process. It takes a detector object
+    containing hits and a Kalman filter object with matrices describing the
+    model with which to perfom the fit. Due to the method used for the fit,
+    which involves starting at the back of the detector (far from the vertex),
+    iterating backwards and then forwards again, the supplied Kalman filter
+    object must subclass the :py:class:`kfilter.TwoWayLKFilter` so that iteration
+    can be reversed.
+
+    :param Detector det_obj: detector containing hits to which tracks are to be
+     fitted
+    :param TwoWayLKFilter filt_obj: a Kalman filter object using which the tracks
+     will be fitted.
+    """
 
     def __init__(self, det_obj, filt_obj):
         assert isinstance(det_obj, Detector)
@@ -40,7 +52,24 @@ class FitManager(object):
 
     def fit(self):
         """Perform a fit of the hits in the detector using the supplied
-        Kalman Filter."""
+        Kalman filter. After tracks have been fitted to the hits, this method
+        returns a list of Kalman filter objects, each of which contains the
+        hits that have been assigned to it. The filters are in the state
+        corresponding to the *x* position one layer distance past the first layer.
+
+        Before the filters are returned, the ones with less than 3 measurements
+        assigned to them are removed as unreliable fits. The quickest way to use
+        the fitted tracks is to get their :py:attr:`measurements_list`::
+
+            >>> ftr = FitManager(det_obj, filtr_obj)
+            >>> kfilters = ftr.fit()
+            >>> for track_y_hits in kfilters.measurements_list:
+            ...     # do something with y hits of each track
+
+        :returns: one Kalman filter object for each track that has been assigned
+         to the hits in the detector
+        :rtype: *list(TwoWayLKFilter)*
+        """
         layers = self.detector.get_layers(reverse=True)
         # special procedure for first layer
         layer = next(layers)
@@ -86,7 +115,24 @@ class FitManager(object):
         return self.fitters
 
     def propagate_tracks(self):
-        """Propagate all fitted tracks."""
+        """Propagate all fitted tracks back towards the back of the detector.
+        This function is meant to be used directly after :py:meth:`fit` to give
+        more usable data back to the user. It returns a list of tracks, where each
+        track is represented by a list of *x* and *y* pairs. Each of these pairs
+        corresponds to the filtered coordinates of a hit assigned to the track.
+        A quick way to get *x* and *y* lists for each track is the following::
+
+            >>> ftr = FitManager(det_obj, filt_obj)
+            >>> ftr.fit()
+            >>> tracks = ftr.propagate_tracks()
+            >>> for track in tracks:
+            ...     x, y = zip(*track)
+            ...     # work with coordinates, e.g. plot(x,y)
+            ...
+
+        :returns: list of filtered track coordinates
+        :rtype: *list(list(tuple))*
+        """
         x_step = self.detector.x_step
         start_x = self.detector.pos()[0]  # x position of left-most layer
         result = []

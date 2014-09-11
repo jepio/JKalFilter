@@ -149,7 +149,7 @@ class Matrix(object):
         Return the dimensions of the matrix.
 
         :returns: dimensions of the matrix *dimx* and *dimy*
-        :rtype: tuple
+        :rtype: *tuple*
         """
         return (self.dimx, self.dimy)
 
@@ -222,7 +222,7 @@ class Matrix(object):
             M^{'} = PM
 
         :returns: matrix **P**
-        :rtype: Matrix
+        :rtype: *Matrix*
         """
         dim, _ = self.size()
         P = Matrix.identity(dim)
@@ -245,7 +245,7 @@ class Matrix(object):
         element of the return tuple.
 
         :return: matrices **P, L, U**
-        :rtype: tuple(Matrix)
+        :rtype: *tuple(Matrix)*
         """
         dimx, dimy = self.size()
         if dimx != dimy:
@@ -310,7 +310,7 @@ class Matrix(object):
         :param Matrix L: lower triangular matrix
         :param Matrix U: upper triangular matrix
         :return: inverse matrix **A** defined above
-        :rtype: Matrix
+        :rtype: *Matrix*
         """
 
         dim, _ = L.size()

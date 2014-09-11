@@ -22,7 +22,7 @@ class Track(object):
         :param x: coordinate at which to calculate the interception point.
         :type x: float
         :return: **y** value of track for a given **x**
-        :rtype: float
+        :rtype: *float*
         """
         raise NotImplementedError
 
@@ -75,7 +75,7 @@ def gen_straight_tracks(N=10):
 
     :param int N: amount of tracks to return
     :return: generated tracks
-    :rtype: list(LineTrack)
+    :rtype: *list(LineTrack)*
     """
     tracks = [None] * N
     random.seed()

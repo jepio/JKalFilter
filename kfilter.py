@@ -87,7 +87,7 @@ class LKFilter(object):
         digits.
 
         :return: measurements assigned to the filter
-        :rtype: list(float)"""
+        :rtype: *list(float)*"""
         return [round(x[0][0], digits) if x is not None
                 else x for x in self.measurements]
 
@@ -196,7 +196,7 @@ class LKFilter(object):
                 pass
 
         :return: current estimate after 1 iteration as provided by :py:attr:`.state`
-        :rtype: tuple(Matrix)
+        :rtype: *tuple(Matrix)*
         """
         try:
             current = self.measurements.pop(0)
