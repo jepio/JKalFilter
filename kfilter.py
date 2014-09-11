@@ -120,8 +120,8 @@ class LKFilter(object):
         """
         Perform one iteration of the Kalman Filter:
 
-            1. :py:meth:`.update` state from measurement
-            2. :py:meth:`.predict` next state from current
+        1. :py:meth:`.update` state from measurement
+        2. :py:meth:`.predict` next state from current
 
         One has to be aware of this order when providing the measurement,
         the supplied measurement should correspond to the filter state before

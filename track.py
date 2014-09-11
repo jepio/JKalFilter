@@ -70,8 +70,8 @@ def gen_straight_tracks(N=10):
     generated using random numbers to generate the track parameters **a** and
     **b**. Currently the parameter ranges are not adjustable and are the following:
 
-        * **a** from -0.268 to 0.268 (corresponds to an angle of -15 to 15 degrees)
-        * **b** from -0.1 to 0.1
+    * **a** from -0.268 to 0.268 (corresponds to an angle of -15 to 15 degrees)
+    * **b** from -0.1 to 0.1
 
     :param int N: amount of tracks to return
     :return: generated tracks
