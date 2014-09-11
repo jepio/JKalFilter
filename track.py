@@ -27,6 +27,25 @@ class LineTrack(Track):
     def get_yintercept(self, x):
         return self.a * x + self.b
 
+class MagneticTrack(LineTrack):
+
+    """A track moving in a magnetic field."""
+
+    def __init__(self, a, b, B):
+        """Create a straight line track that propagates in a magnetic field of
+        strength `B` in z direction."""
+        super(MagneticTrack, self).__init__(a, b)
+        self.B = B
+
+
+    def get_yintercept(self, x):
+        """Return y intercept of track with detector at x.
+        This takes into account the magnetic field."""
+        alpha = math.atan(self.a)
+        vx0, vy0 = (self.a * math.cos(alpha), self.a * math.sin(alpha))
+        yy = (abs((self.a/self.B)**2 - (x - vy0/self.B)**2)**0.5
+              + (self.b-vx0/self.B))
+        return yy
 
 def gen_straight_tracks(N=10):
     """Generate tracks that will be propagated through detector"""

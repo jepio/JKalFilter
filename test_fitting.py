@@ -28,6 +28,7 @@ def main():
         #plt.plot(x_coords, y)
     plt.xlim(0, 10)
     plt.ylim(-1.5, 1.5)
+    plt.gca().set_aspect('equal')
     detector.draw(True)
 
     # measurement matrix
