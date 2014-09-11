@@ -14,3 +14,7 @@
 ----------------------
 .. autoclass:: LineTrack
    :exclude-members: __dict__,__weakref__
+
+:py:meth:`gen_straight_tracks`
+.. autofunction:: gen_straight_tracks
+ 

@@ -15,7 +15,7 @@ class Matrix(object):
 
     A matrix is constructed in one of two ways: passing a list of lists to the
     constructor or creating an :py:meth:`identity`/:py:meth:`zero` matrix and
-    modifying the elements. If the constructor is invoked without parameters an empty matrix will be initialized from the list [[]].
+    modifying the elements. If the constructor is invoked without parameters an empty matrix will be initialized from the list ``[[]]``.
 
         >>> A = Matrix([[1,2,3],[4,5,6]])
         >>> A
@@ -66,7 +66,7 @@ class Matrix(object):
     ################# Properties available externally ##################
     @property
     def value(self):
-        """ Get underlying matrix value, that is a list of list. """
+        """ Get underlying matrix representation, that is a list of list. """
         # Can't be sure if the user uses this to change a matrix entry so have
         # to reset existing cached inverse and transpose.
         self._T = None
@@ -212,8 +212,9 @@ class Matrix(object):
         leftside matrix multiplication:
 
         .. math::
-            M^' = P M
+            M^{'} = PM
 
+        :returns: *Matrix* **P**
         """
         dim, _ = self.size()
         P = Matrix.identity(dim)
@@ -226,12 +227,14 @@ class Matrix(object):
     def LU(self):
         """
         Return the LU decomposition of matrix, that is matrices :math:`L` and
-        :math:`U` such that :math:`LU = \text{self}`. Uses the Crout
+        :math:`U` such that :math:`LU = \\text{self}`. Uses the Crout
         decomposition method, described at
         http://en.wikipedia.org/wiki/Crout_matrix_decomposition
 
         The input matrix needs to be square and the decomposition is actually
-        performed on the pivoted matrix P*self.
+        performed on the pivoted matrix :math:`P \\cdot self` where :math:`P = self.pivot()`. The pivoting matrix is included as the first element of the return tuple.
+
+        :return: tuple of *Matrix* **P, L, U**
         """
         dimx, dimy = self.size()
         if dimx != dimy:
@@ -261,8 +264,9 @@ class Matrix(object):
     @staticmethod
     def LUInvert(P, L, U):
         """
-        Return the inverse matrix of :math:`A = LU` where :math:`L, U`
-        are the LU decomposition matrices.
+        Return the inverse matrix of the matrix :math:`A` defined by the
+        equation :math:`PA = LU` where :math:`L, U` are the LU decomposition
+        matrices and :math:`P` is the matrix used for pivoting.
 
         The method works by looking at the solution to the system
 
@@ -289,7 +293,12 @@ class Matrix(object):
 
         In the final step the inverse matrix :math:`X` is multiplied from the
         rightside with the pivoting matrix, to undo the pivoting. If you do
-        not want pivoting, pass None as P.
+        not want depivoting, pass ``P = None``.
+
+        :param Matrix P: pivoting matrix
+        :param Matrix L: lower triangular matrix
+        :param Matrix U: upper triangular matrix
+        :return: inverse *Matrix* of **A** defined above
         """
 
         dim, _ = L.size()
@@ -333,7 +342,10 @@ class Matrix(object):
         Get inverse matrix through LU decomposition. The result is cached so
         that subsequent accesses to the inverse matrix are instantaneous. The
         result is uncached if the user accesses the matrix :py:attr:`.value`
-        or a matrix element through indexing.
+        or a matrix element through indexing. This is equivalent to::
+
+            decomposition = self.LU()
+            return Matrix.LUInvert(*decomposition)
         """
         if self._I is None:
             self._I = self._inverse()
