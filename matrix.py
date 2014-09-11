@@ -10,7 +10,7 @@ class Matrix(object):
 
     """
     A matrix class covering all major matrix operations. Currently the
-    operations +, - and * are supported. Matrix elements can also be accessed
+    operators +, - and * are supported. Matrix elements can also be accessed
     and modified using indexing.
 
     A matrix is constructed in one of two ways: passing a list of lists to the
@@ -66,7 +66,11 @@ class Matrix(object):
     ################# Properties available externally ##################
     @property
     def value(self):
-        """ Get underlying matrix representation, that is a list of list. """
+        """ Access the underlying data representation of the matrix, that is a
+        list of list.
+
+        :getter: get value
+        :setter: set value"""
         # Can't be sure if the user uses this to change a matrix entry so have
         # to reset existing cached inverse and transpose.
         self._T = None
@@ -142,7 +146,10 @@ class Matrix(object):
 
     def size(self):
         """
-        Return shape of matrix as a tuple (*dimx*, *dimy*).
+        Return the dimensions of the matrix.
+
+        :returns: dimensions of the matrix *dimx* and *dimy*
+        :rtype: tuple
         """
         return (self.dimx, self.dimy)
 
@@ -214,7 +221,8 @@ class Matrix(object):
         .. math::
             M^{'} = PM
 
-        :returns: *Matrix* **P**
+        :returns: matrix **P**
+        :rtype: Matrix
         """
         dim, _ = self.size()
         P = Matrix.identity(dim)
@@ -232,9 +240,12 @@ class Matrix(object):
         http://en.wikipedia.org/wiki/Crout_matrix_decomposition
 
         The input matrix needs to be square and the decomposition is actually
-        performed on the pivoted matrix :math:`P \\cdot self` where :math:`P = self.pivot()`. The pivoting matrix is included as the first element of the return tuple.
+        performed on the pivoted matrix :math:`P \\cdot self` where
+        :math:`P = self.pivot()`. The pivoting matrix is included as the first
+        element of the return tuple.
 
-        :return: tuple of *Matrix* **P, L, U**
+        :return: matrices **P, L, U**
+        :rtype: tuple(Matrix)
         """
         dimx, dimy = self.size()
         if dimx != dimy:
@@ -298,7 +309,8 @@ class Matrix(object):
         :param Matrix P: pivoting matrix
         :param Matrix L: lower triangular matrix
         :param Matrix U: upper triangular matrix
-        :return: inverse *Matrix* of **A** defined above
+        :return: inverse matrix **A** defined above
+        :rtype: Matrix
         """
 
         dim, _ = L.size()

@@ -9,5 +9,5 @@
 ------------------
 .. autoclass:: Matrix
    :exclude-members: __dict__,__weakref__
-   :no-private-members:
    :no-special-members:
+   :no-private-members:

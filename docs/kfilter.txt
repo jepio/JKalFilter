@@ -1,8 +1,8 @@
 
-:py:mod:`filter`
+:py:mod:`kfilter`
 =================
 
-.. automodule:: filter
+.. automodule:: kfilter
    :no-members:
 
 
@@ -10,9 +10,10 @@
 --------------------
 .. autoclass:: LKFilter
    :exclude-members: __dict__,__weakref__
+
    
 :py:class:`TwoWayLKFilter`
 --------------------------
 .. autoclass:: TwoWayLKFilter
    :exclude-members: __dict__,__weakref__
-   
+
