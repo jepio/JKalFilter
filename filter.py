@@ -1,6 +1,7 @@
 """ Kalman Filter module """
 # pylint: disable=C0103,R0192
 from matrix import Matrix
+import collections
 
 
 class LKFilter(object):
@@ -32,11 +33,24 @@ class LKFilter(object):
         self.Q = Q
         self.R = R
         self.I = Matrix.identity(max(x.size()))
-        self.measurements = []
+        self.measurements = None
+        self.counter = None
 
-    def get_state(self):
+    @property
+    def state(self):
         """ Return current state vector and state covariance. """
         return (self.x, self.P)
+
+    @state.setter
+    def state(self, new_state):
+        """ Manually set current state along with its covariance. """
+        self.x, self.P = new_state
+
+    @property
+    def measurements_list(self, digits=5):
+        """Return 1D measurements in list instead of matrix form."""
+        return [round(x[0][0], digits) if x is not None
+                else x for x in self.measurements]
 
     def update(self, measurement):
         """ Update current state using the measurement. """
@@ -55,7 +69,7 @@ class LKFilter(object):
         self.x = self.A * self.x
         self.P = self.A * self.P * self.A.T + self.Q
 
-    def step(self, measurement):
+    def step(self, measurement=None, add=False):
         """
         Perform one iteration of the Kalman Filter:
 
@@ -65,9 +79,26 @@ class LKFilter(object):
         Depending on what is expected the order of these operations can also
         be inverted.
         """
-        self.update(measurement)
+        # Keep track of measurements that have been used by this filter
+        if add:
+            try:
+                self.measurements.append(measurement)
+            except AttributeError:
+                # Means this is the first iteration, initial state should be
+                # added to measurement list
+                self.measurements = [Matrix([self.state[0][0]])]  # ugly, TODO
+
+        if measurement is not None:
+            # if measurement has not been supplied no update will be performed
+            self.update(measurement)
         self.predict()
-        return self.get_state()
+
+        try:
+            self.counter += 1
+        except TypeError:
+            self.counter = 0
+
+        return self.state
 
     def add_meas(self, measurements):
         """
@@ -77,7 +108,7 @@ class LKFilter(object):
         self.measurements = measurements
 
     def __iter__(self):
-        if self.measurements == []:
+        if not self.measurements:
             raise StopIteration
         else:
             return self
@@ -94,3 +125,56 @@ class LKFilter(object):
             return ret
         except IndexError:
             raise StopIteration
+
+
+class TwoWayLKFilter(LKFilter):
+    """A bidirectional Kalman Filter: the measurements will be iterated in both
+    directions starting from the last measurements. This allows the filter to
+    achieve a higher precision of estimation."""
+
+    def __init__(self, *arg, **kwg):
+        super(TwoWayLKFilter, self).__init__(*arg, **kwg)
+        self.reverse_measurements = []
+        # Flag that reflects whether filter is iterating forward or backward
+        self.rev = False
+
+    def add_meas(self, measurements):
+        """Assign measurements to filter."""
+        self.reverse_measurements = collections.deque(measurements)
+        self.measurements = collections.deque(reversed(measurements))
+
+    def reverse(self):
+        """Reverse the direction in which the filter is currently iterating."""
+        self.A = self.A.I
+        self.rev = not self.rev
+
+    def __iter__(self):
+        if not self.measurements:
+            raise StopIteration
+        else:
+            # first iterating backwards, so need inverse transition
+            # matrix
+            self.reverse()
+            return self
+
+    def next(self):
+        """Return the next iteration of the two-way Kalman Filter. First
+        iterates over the measurements in reverse and then in the proper
+        direction."""
+        try:
+            current = self.reverse_measurements.pop()
+            ret = self.step(current)
+            return ret
+        except IndexError:
+            # Finished iterating from the back, now time for forward.
+            # iteration.
+            # Exchange the measurements that are being iterated over.
+            self.reverse_measurements, self.measurements = (
+                self.measurements, self.reverse_measurements)
+            # if reverse_measurements is now empty it means we already iterated
+            # forward, stop iteration.
+            if len(self.reverse_measurements) == 0:
+                raise StopIteration
+            self.reverse()
+            # resume iteration
+            return self.next()
