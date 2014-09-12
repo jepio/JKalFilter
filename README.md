@@ -17,6 +17,11 @@ modular framework consisting of 5 core modules:
 Aside from the core modules, tests exist that present the functionalities of
 *matrix*, *kfilter*, *track* and *fitter*.
 
+The whole package can be conveniently imported by using 
+```python
+from JKalFilter import *
+```
+
 The folder [libtest](./libtest) contains a simple example of using *ctypes* to
 extend Python using C. Build with `make` and launch `./pytest.py` to see a
 comparison of run times.

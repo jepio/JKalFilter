@@ -5,7 +5,8 @@ import random
 import sys
 # pylint: disable=C0103,W0141,R0914
 
-def pretty_output(*args):
+def pretty_output(headers='', *args):
+    print "# " + " ".join(headers)
     output = [' '.join(map("{:.5f}".format, entry)) for entry in
               zip(*args)]
     string_output = '\n'.join(output)
@@ -37,7 +38,7 @@ def test(N=10):
     for new, _ in filt:
         results.append(new[0][0])
 
-    pretty_output(meas_list, results)
+    pretty_output(["Measurements", "Results"], meas_list, results)
 
 def test_square(N=10):
     dt = 0.2
@@ -68,7 +69,8 @@ def test_square(N=10):
         v.append(new[1][0])
         a.append(new[2][0])
 
-    pretty_output(meas_list, results, v, a)
+    pretty_output(["Measurements", "Results","Velocity","Acceleration"],
+                  meas_list, results, v, a)
 
 
 
