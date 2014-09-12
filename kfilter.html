@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2. kfilter &mdash; JKalFilter 0.9rc documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9rc',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="JKalFilter 0.9rc documentation" href="index.html" />
+    <link rel="next" title="3. track" href="track.html" />
+    <link rel="prev" title="1. matrix" href="matrix.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="track.html" title="3. track"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="matrix.html" title="1. matrix"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">JKalFilter 0.9rc documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-kfilter">
+<span id="kfilter"></span><h1>2. <a class="reference internal" href="#module-kfilter" title="kfilter"><tt class="xref py py-mod docutils literal"><span class="pre">kfilter</span></tt></a><a class="headerlink" href="#module-kfilter" title="Permalink to this headline">¶</a></h1>
+<p>A Kalman Filter module. Currently two kinds of filters are implemented:</p>
+<ol class="arabic simple">
+<li>a linear Kalman Filter (<a class="reference internal" href="#kfilter.LKFilter" title="kfilter.LKFilter"><tt class="xref py py-class docutils literal"><span class="pre">LKFilter</span></tt></a>)</li>
+<li>a linear Kalman Filter which can be updated both forward and backward
+(<a class="reference internal" href="#kfilter.TwoWayLKFilter" title="kfilter.TwoWayLKFilter"><tt class="xref py py-class docutils literal"><span class="pre">TwoWayLKFilter</span></tt></a>)</li>
+</ol>
+<div class="section" id="lkfilter">
+<h2>2.1. <a class="reference internal" href="#kfilter.LKFilter" title="kfilter.LKFilter"><tt class="xref py py-class docutils literal"><span class="pre">LKFilter</span></tt></a><a class="headerlink" href="#lkfilter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="kfilter.LKFilter">
+<em class="property">class </em><tt class="descclassname">kfilter.</tt><tt class="descname">LKFilter</tt><big>(</big><em>A</em>, <em>H</em>, <em>x</em>, <em>P</em>, <em>Q</em>, <em>R</em><big>)</big><a class="reference internal" href="_modules/kfilter.html#LKFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.LKFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A Linear Kalman Filter implementation. The filter needs to be initialized
+with the proper Kalman matrices (take care of proper dimensions) and a given
+valid estimates of initial state and covariance.</p>
+<p>Once initialized, the user has full control over what he does with the
+filter. If he so wishes, he can manually step it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">filt</span> <span class="o">=</span> <span class="n">LKFilter</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="n">measurement_list</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">estimate</span> <span class="o">=</span> <span class="n">filt</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="c"># do something with estimate</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>He can also iterate over a filter when it has measurements assigned to it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">filtered</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filt</span><span class="o">.</span><span class="n">add_meas</span><span class="p">(</span><span class="n">measurement_list</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="n">filt</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="c"># process estimate</span>
+<span class="gp">... </span>   <span class="n">filtered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the user needs a more fine-grained control, he has access to the functions
+<a class="reference internal" href="#kfilter.LKFilter.update" title="kfilter.LKFilter.update"><tt class="xref py py-meth docutils literal"><span class="pre">update()</span></tt></a> and <a class="reference internal" href="#kfilter.LKFilter.predict" title="kfilter.LKFilter.predict"><tt class="xref py py-meth docutils literal"><span class="pre">predict()</span></tt></a>, the two basic building stones
+of a Kalman filter iteration. At any time the current state estimate of the filter can be accessed using the <a class="reference internal" href="#kfilter.LKFilter.state" title="kfilter.LKFilter.state"><tt class="xref py py-attr docutils literal"><span class="pre">state</span></tt></a> property.</p>
+<p>For more details on this implementation go to:
+<a class="reference external" href="http://greg.czerniak.info/guides/kalman1/">http://greg.czerniak.info/guides/kalman1/</a></p>
+<dl class="method">
+<dt id="kfilter.LKFilter.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>A</em>, <em>H</em>, <em>x</em>, <em>P</em>, <em>Q</em>, <em>R</em><big>)</big><a class="reference internal" href="_modules/kfilter.html#LKFilter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.LKFilter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the Kalman Filter matrices. This implementation skips the
+control input vector. Symbols used:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>A</strong> (<em>Matrix</em>) &#8211; state transition matrix - predict next state from current one</li>
+<li><strong>H</strong> (<em>Matrix</em>) &#8211; observation matrix, calculate measurement from the state</li>
+<li><strong>x</strong> (<em>Matrix</em>) &#8211; initial estimate of the state</li>
+<li><strong>P</strong> (<em>Matrix</em>) &#8211; initial estimate of the state covariance matrix</li>
+<li><strong>Q</strong> (<em>Matrix</em>) &#8211; estimated process covariance</li>
+<li><strong>R</strong> (<em>Matrix</em>) &#8211; estimated measurement covariance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><p class="first last"><strong>I</strong> (<em>Matrix</em>) &#8211; an identity matrix of size equal to dimension of the state vector</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="kfilter.LKFilter.add_meas">
+<tt class="descname">add_meas</tt><big>(</big><em>measurements</em><big>)</big><a class="reference internal" href="_modules/kfilter.html#LKFilter.add_meas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.LKFilter.add_meas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign measurements to the Kalman Filter object. Necessary for
+iteration over the measurements, but when invoking <a class="reference internal" href="#kfilter.LKFilter.step" title="kfilter.LKFilter.step"><tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt></a> by
+hand the measurements need to be supplied to the function call.</p>
+<p>Measurements should be provided as a list of matrices (vector shaped) ready to be
+processed by the filter. The dimensions of each measurement matrix should
+correspond to the size of the matrix one gets when performing matrix
+multiplication between the the observation matrix <strong>H</strong> and the state
+vector <strong>x</strong>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>measurements</strong> (<em>list(Matrix)</em>) &#8211; List of measurements in the order in the correct order</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kfilter.LKFilter.measurements_list">
+<tt class="descname">measurements_list</tt><a class="reference internal" href="_modules/kfilter.html#LKFilter.measurements_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.LKFilter.measurements_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the measurements that are saved in the filter in list format.
+Currently only returns the first entry of each measurement matrix. The
+measurements are returned as floating point numbers rounded to 5 decimal
+digits.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">measurements assigned to the filter</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><em>list(float)</em></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="kfilter.LKFilter.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/kfilter.html#LKFilter.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.LKFilter.next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the next iteration of the Kalman Filter. Iteration is done using
+the <a class="reference internal" href="#kfilter.LKFilter.step" title="kfilter.LKFilter.step"><tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt></a> method. Requires that the list of measurements be
+assigned to the filter first via <a class="reference internal" href="#kfilter.LKFilter.add_meas" title="kfilter.LKFilter.add_meas"><tt class="xref py py-meth docutils literal"><span class="pre">add_meas()</span></tt></a>. Iteration and calling
+this function consumes the measurements stored in the filter. The user
+should be aware of that and take appropriate steps to ensure that the
+data is not lost to him:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+<span class="n">measurements_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">measurements</span><span class="p">)</span>
+<span class="c"># or</span>
+<span class="n">measurements_copy</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">measurements</span><span class="p">]</span>
+<span class="c"># now it is safe to assign measurements and iterate over them</span>
+<span class="n">filt</span><span class="o">.</span><span class="n">add_meas</span><span class="p">(</span><span class="n">measurements</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">filt</span><span class="p">:</span>
+    <span class="c"># process</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">current estimate after 1 iteration as provided by <a class="reference internal" href="#kfilter.LKFilter.state" title="kfilter.LKFilter.state"><tt class="xref py py-attr docutils literal"><span class="pre">state</span></tt></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><em>tuple(Matrix)</em></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="kfilter.LKFilter.predict">
+<tt class="descname">predict</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/kfilter.html#LKFilter.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.LKFilter.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the prediction of the next state based on the current state.
+This updates the filters internal state (<strong>x</strong> and <strong>P</strong>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="kfilter.LKFilter.state">
+<tt class="descname">state</tt><a class="reference internal" href="_modules/kfilter.html#LKFilter.state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.LKFilter.state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return current state vector <strong>x</strong> and state covariance <strong>P</strong>.
+Implemented as a property. The user is also allowed to change the
+current state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Getter :</th><td class="field-body">get tuple (<strong>x</strong>, <strong>P</strong>)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Setter :</th><td class="field-body">set current state</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="kfilter.LKFilter.step">
+<tt class="descname">step</tt><big>(</big><em>measurement=None</em>, <em>add=False</em><big>)</big><a class="reference internal" href="_modules/kfilter.html#LKFilter.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.LKFilter.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform one iteration of the Kalman Filter:</p>
+<ol class="arabic simple">
+<li><a class="reference internal" href="#kfilter.LKFilter.update" title="kfilter.LKFilter.update"><tt class="xref py py-meth docutils literal"><span class="pre">update()</span></tt></a> state from measurement</li>
+<li><a class="reference internal" href="#kfilter.LKFilter.predict" title="kfilter.LKFilter.predict"><tt class="xref py py-meth docutils literal"><span class="pre">predict()</span></tt></a> next state from current</li>
+</ol>
+<p>One has to be aware of this order when providing the measurement,
+the supplied measurement should correspond to the filter state before
+the call to <a class="reference internal" href="#kfilter.LKFilter.step" title="kfilter.LKFilter.step"><tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>measurement</strong> (<em>Matrix or None</em>) &#8211; the measurement used to update the state, if <tt class="docutils literal"><span class="pre">None</span></tt> the filter will only perfom prediction</li>
+<li><strong>add</strong> (<em>bool</em>) &#8211; toggle appending processed measurements to measurement list
+(should generally not be used can result in endless loop).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#kfilter.LKFilter.state" title="kfilter.LKFilter.state"><tt class="xref py py-attr docutils literal"><span class="pre">state</span></tt></a> after the iteration</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="kfilter.LKFilter.update">
+<tt class="descname">update</tt><big>(</big><em>measurement</em><big>)</big><a class="reference internal" href="_modules/kfilter.html#LKFilter.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.LKFilter.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the current state prediction of the filter using the
+<strong>measurement</strong>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>measurement</strong> (<em>Matrix</em>) &#8211; measurement that will be used for the update</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises Exception:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">if size of the measurement is not the same as the shape of
+<tt class="docutils literal"><span class="pre">H</span> <span class="pre">*</span> <span class="pre">x</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="twowaylkfilter">
+<h2>2.2. <a class="reference internal" href="#kfilter.TwoWayLKFilter" title="kfilter.TwoWayLKFilter"><tt class="xref py py-class docutils literal"><span class="pre">TwoWayLKFilter</span></tt></a><a class="headerlink" href="#twowaylkfilter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="kfilter.TwoWayLKFilter">
+<em class="property">class </em><tt class="descclassname">kfilter.</tt><tt class="descname">TwoWayLKFilter</tt><big>(</big><em>*arg</em>, <em>**kwg</em><big>)</big><a class="reference internal" href="_modules/kfilter.html#TwoWayLKFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.TwoWayLKFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#kfilter.LKFilter" title="kfilter.LKFilter"><tt class="xref py py-class docutils literal"><span class="pre">kfilter.LKFilter</span></tt></a></p>
+<p>A bidirectional Kalman Filter. Extends <a class="reference internal" href="#kfilter.LKFilter" title="kfilter.LKFilter"><tt class="xref py py-class docutils literal"><span class="pre">LKFilter</span></tt></a> and takes
+the same constructor parameters.</p>
+<p>If the filter object is treated as an iterable, the measurements will be
+iterated over in both directions starting from the last measurements. This
+allows the filter to achieve a higher precision of estimation.</p>
+<p>When measurements are iterated the filter returns two sets of states: the
+measurements iterated over backwards and then forwards.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">measurements</span><span class="p">)</span>
+<span class="go">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filt</span><span class="o">.</span><span class="n">add_meas</span><span class="p">(</span><span class="n">measurements</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">states</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filt</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">states</span><span class="p">)</span>
+<span class="go">20</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">forwards</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="mi">10</span><span class="p">:]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">backwards</span> <span class="o">=</span> <span class="n">states</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>When the user iterates by calling <a class="reference internal" href="#kfilter.LKFilter.step" title="kfilter.LKFilter.step"><tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt></a> by hand he can reverse the
+direction in which the filter is going by calling <a class="reference internal" href="#kfilter.TwoWayLKFilter.reverse" title="kfilter.TwoWayLKFilter.reverse"><tt class="xref py py-meth docutils literal"><span class="pre">reverse()</span></tt></a>. This
+is done by reversing the state transition matrix <strong>A</strong>.</p>
+<p>When assigning the measurements to the filter in real time the user can use
+the <tt class="docutils literal"><span class="pre">add</span></tt> keyword argument of the <a class="reference internal" href="#kfilter.LKFilter.step" title="kfilter.LKFilter.step"><tt class="xref py py-meth docutils literal"><span class="pre">step()</span></tt></a> method to have the filter save the
+measurements while stepping. Once all measurements have been iterated over the
+filter can be reversed and iterate over the measurements once more to get a
+better estimate.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">filt</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filt</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">better_estimates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filt</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">better_estimates</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="kfilter.TwoWayLKFilter.add_meas">
+<tt class="descname">add_meas</tt><big>(</big><em>measurements</em><big>)</big><a class="reference internal" href="_modules/kfilter.html#TwoWayLKFilter.add_meas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.TwoWayLKFilter.add_meas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the measurements to be iterated over in the filter.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kfilter.TwoWayLKFilter.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/kfilter.html#TwoWayLKFilter.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.TwoWayLKFilter.next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the next iteration of the two-way Kalman Filter. First
+iterates over the measurements in reverse and then in the forward
+direction.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kfilter.TwoWayLKFilter.reverse">
+<tt class="descname">reverse</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/kfilter.html#TwoWayLKFilter.reverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kfilter.TwoWayLKFilter.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverses the direction in which the filter is currently iterating.
+This performs a matrix inversion of the matrix state transition matrix
+<strong>A</strong>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2. <tt class="docutils literal"><span class="pre">kfilter</span></tt></a><ul>
+<li><a class="reference internal" href="#lkfilter">2.1. <tt class="docutils literal"><span class="pre">LKFilter</span></tt></a></li>
+<li><a class="reference internal" href="#twowaylkfilter">2.2. <tt class="docutils literal"><span class="pre">TwoWayLKFilter</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="matrix.html"
+                        title="previous chapter">1. <tt class="docutils literal docutils literal"><span class="pre">matrix</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="track.html"
+                        title="next chapter">3. <tt class="docutils literal docutils literal"><span class="pre">track</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/kfilter.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="track.html" title="3. track"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="matrix.html" title="1. matrix"
+             >previous</a> |</li>
+        <li><a href="index.html">JKalFilter 0.9rc documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, jepio.
+      Last updated on Sep 12, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

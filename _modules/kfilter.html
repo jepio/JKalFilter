@@ -1,0 +1,393 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>kfilter &mdash; JKalFilter 0.9rc documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9rc',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="JKalFilter 0.9rc documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">JKalFilter 0.9rc documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for kfilter</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;A Kalman Filter module. Currently two kinds of filters are implemented:</span>
+
+<span class="sd">    1. a linear Kalman Filter (:py:class:`.LKFilter`)</span>
+<span class="sd">    2. a linear Kalman Filter which can be updated both forward and backward</span>
+<span class="sd">       (:py:class:`.TwoWayLKFilter`)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c"># pylint: disable=C0103,R0192</span>
+<span class="kn">from</span> <span class="nn">matrix</span> <span class="kn">import</span> <span class="n">Matrix</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+
+<div class="viewcode-block" id="LKFilter"><a class="viewcode-back" href="../kfilter.html#kfilter.LKFilter">[docs]</a><span class="k">class</span> <span class="nc">LKFilter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Linear Kalman Filter implementation. The filter needs to be initialized</span>
+<span class="sd">    with the proper Kalman matrices (take care of proper dimensions) and a given</span>
+<span class="sd">    valid estimates of initial state and covariance.</span>
+
+<span class="sd">    Once initialized, the user has full control over what he does with the</span>
+<span class="sd">    filter. If he so wishes, he can manually step it::</span>
+
+<span class="sd">        &gt;&gt;&gt; filt = LKFilter(A, H, x, P, Q, R)</span>
+<span class="sd">        &gt;&gt;&gt; for measurement in measurement_list:</span>
+<span class="sd">        ...     estimate = filt.step(measurement)</span>
+<span class="sd">        ...     # do something with estimate</span>
+<span class="sd">        ...</span>
+
+<span class="sd">    He can also iterate over a filter when it has measurements assigned to it::</span>
+
+<span class="sd">        &gt;&gt;&gt; filtered = []</span>
+<span class="sd">        &gt;&gt;&gt; filt.add_meas(measurement_list)</span>
+<span class="sd">        &gt;&gt;&gt; for estimate in filt:</span>
+<span class="sd">        ...    # process estimate</span>
+<span class="sd">        ...    filtered.append(estimate)</span>
+
+<span class="sd">    If the user needs a more fine-grained control, he has access to the functions</span>
+<span class="sd">    :py:meth:`.update` and :py:meth:`.predict`, the two basic building stones</span>
+<span class="sd">    of a Kalman filter iteration. At any time the current state estimate of the filter can be accessed using the :py:attr:`.state` property.</span>
+
+<span class="sd">    For more details on this implementation go to:</span>
+<span class="sd">    http://greg.czerniak.info/guides/kalman1/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LKFilter.__init__"><a class="viewcode-back" href="../kfilter.html#kfilter.LKFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the Kalman Filter matrices. This implementation skips the</span>
+<span class="sd">        control input vector. Symbols used:</span>
+
+<span class="sd">        :param Matrix A: state transition matrix - predict next state from current one</span>
+<span class="sd">        :param Matrix H: observation matrix, calculate measurement from the state</span>
+<span class="sd">        :param Matrix x: initial estimate of the state</span>
+<span class="sd">        :param Matrix P: initial estimate of the state covariance matrix</span>
+<span class="sd">        :param Matrix Q: estimated process covariance</span>
+<span class="sd">        :param Matrix R: estimated measurement covariance</span>
+<span class="sd">        :var Matrix I: an identity matrix of size equal to dimension of the state vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">H</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">P</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="n">Q</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">R</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">Matrix</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return current state vector **x** and state covariance **P**.</span>
+<span class="sd">        Implemented as a property. The user is also allowed to change the</span>
+<span class="sd">        current state.</span>
+
+<span class="sd">        :getter: get tuple (**x**, **P**)</span>
+<span class="sd">        :setter: set current state&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
+
+    <span class="nd">@state.setter</span>
+<div class="viewcode-block" id="LKFilter.state"><a class="viewcode-back" href="../kfilter.html#kfilter.LKFilter.state">[docs]</a>    <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Manually set current state along with its covariance. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">new_state</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="LKFilter.measurements_list"><a class="viewcode-back" href="../kfilter.html#kfilter.LKFilter.measurements_list">[docs]</a>    <span class="k">def</span> <span class="nf">measurements_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">digits</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the measurements that are saved in the filter in list format.</span>
+<span class="sd">        Currently only returns the first entry of each measurement matrix. The</span>
+<span class="sd">        measurements are returned as floating point numbers rounded to 5 decimal</span>
+<span class="sd">        digits.</span>
+
+<span class="sd">        :return: measurements assigned to the filter</span>
+<span class="sd">        :rtype: *list(float)*&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">digits</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+                <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="LKFilter.update"><a class="viewcode-back" href="../kfilter.html#kfilter.LKFilter.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update the current state prediction of the filter using the</span>
+<span class="sd">        **measurement**.</span>
+
+<span class="sd">        :param measurement: measurement that will be used for the update</span>
+<span class="sd">        :type measurement: Matrix</span>
+<span class="sd">        :raises Exception: if size of the measurement is not the same as the shape of</span>
+<span class="sd">         ``H * x``.</span>
+<span class="sd">         &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">measurement</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Wrong vector shape&quot;</span><span class="p">)</span>
+        <span class="c"># Update</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">measurement</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">S</span><span class="o">.</span><span class="n">I</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">K</span> <span class="o">*</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">-</span> <span class="n">K</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span>
+</div>
+<div class="viewcode-block" id="LKFilter.predict"><a class="viewcode-back" href="../kfilter.html#kfilter.LKFilter.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform the prediction of the next state based on the current state.</span>
+<span class="sd">        This updates the filters internal state (**x** and **P**). &quot;&quot;&quot;</span>
+        <span class="c"># Predict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span>
+</div>
+<div class="viewcode-block" id="LKFilter.step"><a class="viewcode-back" href="../kfilter.html#kfilter.LKFilter.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform one iteration of the Kalman Filter:</span>
+
+<span class="sd">        1. :py:meth:`.update` state from measurement</span>
+<span class="sd">        2. :py:meth:`.predict` next state from current</span>
+
+<span class="sd">        One has to be aware of this order when providing the measurement,</span>
+<span class="sd">        the supplied measurement should correspond to the filter state before</span>
+<span class="sd">        the call to :py:meth:`.step`.</span>
+
+<span class="sd">        :param measurement: the measurement used to update the state, if ``None`` the filter will only perfom prediction</span>
+<span class="sd">        :type measurement: Matrix or None</span>
+<span class="sd">        :param bool add: toggle appending processed measurements to measurement list</span>
+<span class="sd">         (should generally not be used can result in endless loop).</span>
+<span class="sd">        :returns: :py:attr:`.state` after the iteration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Keep track of measurements that have been used by this filter</span>
+        <span class="k">if</span> <span class="n">add</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="c"># Means this is the first iteration, initial state should be</span>
+                <span class="c"># added to measurement list</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="p">[</span><span class="n">Matrix</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]])]</span>  <span class="c"># ugly, TODO</span>
+
+        <span class="k">if</span> <span class="n">measurement</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># if measurement has not been supplied no update will be performed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+</div>
+<div class="viewcode-block" id="LKFilter.add_meas"><a class="viewcode-back" href="../kfilter.html#kfilter.LKFilter.add_meas">[docs]</a>    <span class="k">def</span> <span class="nf">add_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurements</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign measurements to the Kalman Filter object. Necessary for</span>
+<span class="sd">        iteration over the measurements, but when invoking :py:meth:`.step` by</span>
+<span class="sd">        hand the measurements need to be supplied to the function call.</span>
+
+<span class="sd">        Measurements should be provided as a list of matrices (vector shaped) ready to be</span>
+<span class="sd">        processed by the filter. The dimensions of each measurement matrix should</span>
+<span class="sd">        correspond to the size of the matrix one gets when performing matrix</span>
+<span class="sd">        multiplication between the the observation matrix **H** and the state</span>
+<span class="sd">        vector **x**.</span>
+
+<span class="sd">        :param list(Matrix) measurements: List of measurements in the order in the correct order</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="n">measurements</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="LKFilter.next"><a class="viewcode-back" href="../kfilter.html#kfilter.LKFilter.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the next iteration of the Kalman Filter. Iteration is done using</span>
+<span class="sd">        the :py:meth:`step` method. Requires that the list of measurements be</span>
+<span class="sd">        assigned to the filter first via :py:meth:`.add_meas`. Iteration and calling</span>
+<span class="sd">        this function consumes the measurements stored in the filter. The user</span>
+<span class="sd">        should be aware of that and take appropriate steps to ensure that the</span>
+<span class="sd">        data is not lost to him::</span>
+
+<span class="sd">            from copy import copy</span>
+<span class="sd">            measurements_copy = copy(measurements)</span>
+<span class="sd">            # or</span>
+<span class="sd">            measurements_copy = [entry for entry in measurements]</span>
+<span class="sd">            # now it is safe to assign measurements and iterate over them</span>
+<span class="sd">            filt.add_meas(measurements)</span>
+<span class="sd">            for state in filt:</span>
+<span class="sd">                # process</span>
+<span class="sd">                pass</span>
+
+<span class="sd">        :return: current estimate after 1 iteration as provided by :py:attr:`.state`</span>
+<span class="sd">        :rtype: *tuple(Matrix)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+</div></div>
+<div class="viewcode-block" id="TwoWayLKFilter"><a class="viewcode-back" href="../kfilter.html#kfilter.TwoWayLKFilter">[docs]</a><span class="k">class</span> <span class="nc">TwoWayLKFilter</span><span class="p">(</span><span class="n">LKFilter</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;A bidirectional Kalman Filter. Extends :py:class:`LKFilter` and takes</span>
+<span class="sd">    the same constructor parameters.</span>
+
+<span class="sd">    If the filter object is treated as an iterable, the measurements will be</span>
+<span class="sd">    iterated over in both directions starting from the last measurements. This</span>
+<span class="sd">    allows the filter to achieve a higher precision of estimation.</span>
+
+<span class="sd">    When measurements are iterated the filter returns two sets of states: the</span>
+<span class="sd">    measurements iterated over backwards and then forwards.</span>
+
+<span class="sd">        &gt;&gt;&gt; len(measurements)</span>
+<span class="sd">        10</span>
+<span class="sd">        &gt;&gt;&gt; filt.add_meas(measurements)</span>
+<span class="sd">        &gt;&gt;&gt; states = list(filt)</span>
+<span class="sd">        &gt;&gt;&gt; len(states)</span>
+<span class="sd">        20</span>
+<span class="sd">        &gt;&gt;&gt; forwards = states[10:]</span>
+<span class="sd">        &gt;&gt;&gt; backwards = states[:10]</span>
+
+<span class="sd">    When the user iterates by calling :py:meth:`.step` by hand he can reverse the</span>
+<span class="sd">    direction in which the filter is going by calling :py:meth:`.reverse`. This</span>
+<span class="sd">    is done by reversing the state transition matrix **A**.</span>
+
+<span class="sd">    When assigning the measurements to the filter in real time the user can use</span>
+<span class="sd">    the ``add`` keyword argument of the :py:meth:`.step` method to have the filter save the</span>
+<span class="sd">    measurements while stepping. Once all measurements have been iterated over the</span>
+<span class="sd">    filter can be reversed and iterate over the measurements once more to get a</span>
+<span class="sd">    better estimate.</span>
+
+<span class="sd">        &gt;&gt;&gt; for measurement in data:</span>
+<span class="sd">        ...     filt.step(measurement, add=True)</span>
+<span class="sd">        ...</span>
+<span class="sd">        &gt;&gt;&gt; filt.reverse()</span>
+<span class="sd">        &gt;&gt;&gt; better_estimates = list(filt)</span>
+<span class="sd">        &gt;&gt;&gt; len(better_estimates) == len(data)</span>
+<span class="sd">        True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwg</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TwoWayLKFilter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reverse_measurements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c"># Flag that reflects whether filter is iterating forward or backward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rev</span> <span class="o">=</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="TwoWayLKFilter.add_meas"><a class="viewcode-back" href="../kfilter.html#kfilter.TwoWayLKFilter.add_meas">[docs]</a>    <span class="k">def</span> <span class="nf">add_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurements</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stores the measurements to be iterated over in the filter.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reverse_measurements</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="n">measurements</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">measurements</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="TwoWayLKFilter.reverse"><a class="viewcode-back" href="../kfilter.html#kfilter.TwoWayLKFilter.reverse">[docs]</a>    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reverses the direction in which the filter is currently iterating.</span>
+<span class="sd">        This performs a matrix inversion of the matrix state transition matrix</span>
+<span class="sd">        **A**.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">I</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rev</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">rev</span>
+</div>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># first iterating backwards, so need inverse transition</span>
+            <span class="c"># matrix</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="TwoWayLKFilter.next"><a class="viewcode-back" href="../kfilter.html#kfilter.TwoWayLKFilter.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the next iteration of the two-way Kalman Filter. First</span>
+<span class="sd">        iterates over the measurements in reverse and then in the forward</span>
+<span class="sd">        direction.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reverse_measurements</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="c"># Finished iterating from the back, now time for forward.</span>
+            <span class="c"># iteration.</span>
+            <span class="c"># Exchange the measurements that are being iterated over.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reverse_measurements</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reverse_measurements</span><span class="p">)</span>
+            <span class="c"># if reverse_measurements is now empty it means we already iterated</span>
+            <span class="c"># forward, stop iteration.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reverse_measurements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">StopIteration</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="c"># resume iteration</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">JKalFilter 0.9rc documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, jepio.
+      Last updated on Sep 12, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

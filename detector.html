@@ -1,0 +1,374 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>4. detector &mdash; JKalFilter 0.9rc documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9rc',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="JKalFilter 0.9rc documentation" href="index.html" />
+    <link rel="next" title="5. fitter" href="fitter.html" />
+    <link rel="prev" title="3. track" href="track.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="fitter.html" title="5. fitter"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="track.html" title="3. track"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">JKalFilter 0.9rc documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-detector">
+<span id="detector"></span><h1>4. <a class="reference internal" href="#module-detector" title="detector"><tt class="xref py py-mod docutils literal"><span class="pre">detector</span></tt></a><a class="headerlink" href="#module-detector" title="Permalink to this headline">¶</a></h1>
+<p>Module implementing detectors and the detectors interaction with <a class="reference internal" href="track.html#module-track" title="track"><tt class="xref py py-mod docutils literal"><span class="pre">track</span></tt></a>.</p>
+<div class="section" id="id1">
+<h2>4.1. <a class="reference internal" href="#detector.Detector" title="detector.Detector"><tt class="xref py py-class docutils literal"><span class="pre">Detector</span></tt></a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="detector.Detector">
+<em class="property">class </em><tt class="descclassname">detector.</tt><tt class="descname">Detector</tt><big>(</big><em>x</em>, <em>y</em>, <em>x_err=0</em>, <em>y_err=0</em><big>)</big><a class="reference internal" href="_modules/detector.html#Detector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.Detector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Detector baseclass meant to be inherited by all detectors. Each
+detector should implement 3 functionalities:</p>
+<ol class="arabic simple">
+<li><a class="reference internal" href="#detector.Detector.clear_hits" title="detector.Detector.clear_hits"><tt class="xref py py-meth docutils literal"><span class="pre">clear_hits()</span></tt></a> to clear the hits stored in the detector</li>
+<li><a class="reference internal" href="#detector.Detector.hit" title="detector.Detector.hit"><tt class="xref py py-meth docutils literal"><span class="pre">hit()</span></tt></a> to hit the detector at the correct location.</li>
+<li><a class="reference internal" href="#detector.Detector.pos" title="detector.Detector.pos"><tt class="xref py py-meth docutils literal"><span class="pre">pos()</span></tt></a> to retries the position of the detector.</li>
+</ol>
+<p>This baseclass provides default implementations of these 3 methods, but
+they should be overridden for more complex detectors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; horizontal position of detector</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; vertical position of detector</li>
+<li><strong>x_err</strong> (<em>float</em>) &#8211; measurement(hit) horizontal uncertainty</li>
+<li><strong>y_err</strong> (<em>float</em>) &#8211; measurement(hit) vertical uncertainty</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Variables:</th><td class="field-body"><p class="first last"><strong>hits</strong> (<em>int</em>) &#8211; amount of hits registered in this detector</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="detector.Detector.clear_hits">
+<tt class="descname">clear_hits</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/detector.html#Detector.clear_hits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.Detector.clear_hits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear hits from detector</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="detector.Detector.hit">
+<tt class="descname">hit</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="_modules/detector.html#Detector.hit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.Detector.hit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increment the amount of hits in this detector. The default
+implementation increments the count by one, not checking passed
+parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="detector.Detector.pos">
+<tt class="descname">pos</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/detector.html#Detector.pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.Detector.pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the position of the detector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">position of the detector (<strong>x</strong>, <strong>y</strong>)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">tuple(float)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="strip">
+<h2>4.2. <a class="reference internal" href="#detector.Strip" title="detector.Strip"><tt class="xref py py-class docutils literal"><span class="pre">Strip</span></tt></a><a class="headerlink" href="#strip" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="detector.Strip">
+<em class="property">class </em><tt class="descclassname">detector.</tt><tt class="descname">Strip</tt><big>(</big><em>x</em>, <em>y</em>, <em>height</em>, <em>x_err=0</em>, <em>y_err=None</em>, <em>parent=None</em><big>)</big><a class="reference internal" href="_modules/detector.html#Strip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.Strip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#detector.Detector" title="detector.Detector"><tt class="xref py py-class docutils literal"><span class="pre">detector.Detector</span></tt></a></p>
+<p>A strip detector, designed to be part of a <a class="reference internal" href="#detector.Layer" title="detector.Layer"><tt class="xref py py-class docutils literal"><span class="pre">Layer</span></tt></a>. If
+<em>y_err</em> is <tt class="docutils literal"><span class="pre">None</span></tt> then the errors will be computed from uniform
+distribution errors. The default method implementations in <a class="reference internal" href="#detector.Detector" title="detector.Detector"><tt class="xref py py-class docutils literal"><span class="pre">Detector</span></tt></a>
+are sufficient for this class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; horizontal position of detector</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; vertical position of detector</li>
+<li><strong>height</strong> (<em>float</em>) &#8211; The vertical size of the detector</li>
+<li><strong>x_err</strong> (<em>float</em>) &#8211; measurement(hit) horizontal uncertainty</li>
+<li><strong>y_err</strong> (<em>float</em>) &#8211; measurement(hit) vertical uncertainty</li>
+<li><strong>parent</strong> &#8211; a reference to the parent detector to which this strip
+belongs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="layer">
+<h2>4.3. <a class="reference internal" href="#detector.Layer" title="detector.Layer"><tt class="xref py py-class docutils literal"><span class="pre">Layer</span></tt></a><a class="headerlink" href="#layer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="detector.Layer">
+<em class="property">class </em><tt class="descclassname">detector.</tt><tt class="descname">Layer</tt><big>(</big><em>x</em>, <em>y</em>, <em>height</em>, <em>num_strips</em>, <em>parent</em><big>)</big><a class="reference internal" href="_modules/detector.html#Layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.Layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#detector.Detector" title="detector.Detector"><tt class="xref py py-class docutils literal"><span class="pre">detector.Detector</span></tt></a></p>
+<p>A layer detector containing many <a class="reference internal" href="#detector.Strip" title="detector.Strip"><tt class="xref py py-class docutils literal"><span class="pre">Strip</span></tt></a> detectors, meant to
+be part of a <a class="reference internal" href="#detector.LayeredDetector" title="detector.LayeredDetector"><tt class="xref py py-class docutils literal"><span class="pre">LayeredDetector</span></tt></a>. The <a class="reference internal" href="#detector.Detector.clear_hits" title="detector.Detector.clear_hits"><tt class="xref py py-meth docutils literal"><span class="pre">clear_hits()</span></tt></a>
+implementation in this class removes hits from this detector and all
+detectors that belong to it. The tuple returned by <a class="reference internal" href="#detector.Detector.pos" title="detector.Detector.pos"><tt class="xref py py-meth docutils literal"><span class="pre">pos()</span></tt></a> will hold
+the <em>x</em> position of the layer and the <em>y</em> position of the middle.</p>
+<p>Constructed strips will have <em>y</em> positions from <tt class="docutils literal"><span class="pre">y</span> <span class="pre">-</span> <span class="pre">height</span></tt> to
+<tt class="docutils literal"><span class="pre">y</span> <span class="pre">+</span> <span class="pre">height</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; horizontal position of detector</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; horizontal position of detector</li>
+<li><strong>height</strong> (<em>float</em>) &#8211; the height of the whole layer</li>
+<li><strong>num_strips</strong> (<em>int</em>) &#8211; the amount of strips of which the layer consists -
+they will be automatically constructed</li>
+<li><strong>parent</strong> &#8211; a reference to the parent detector to which this strip
+belongs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="detector.Layer.hit">
+<tt class="descname">hit</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="_modules/detector.html#Layer.hit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.Layer.hit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increment the hit count in the correct strip. Will find the correct
+strip based on the passed <em>y</em> parameter. The <em>x</em> parameter should
+always be the same one as returned by <tt class="docutils literal"><span class="pre">self.pos()</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; <strong>x</strong> position of this detector</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; <strong>y</strong> position at which the detector was hit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="layereddetector">
+<h2>4.4. <a class="reference internal" href="#detector.LayeredDetector" title="detector.LayeredDetector"><tt class="xref py py-class docutils literal"><span class="pre">LayeredDetector</span></tt></a><a class="headerlink" href="#layereddetector" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="detector.LayeredDetector">
+<em class="property">class </em><tt class="descclassname">detector.</tt><tt class="descname">LayeredDetector</tt><big>(</big><em>x</em>, <em>y</em>, <em>height</em>, <em>length</em>, <em>num_layers</em>, <em>num_strips</em><big>)</big><a class="reference internal" href="_modules/detector.html#LayeredDetector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.LayeredDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#detector.Detector" title="detector.Detector"><tt class="xref py py-class docutils literal"><span class="pre">detector.Detector</span></tt></a></p>
+<p>A layered detector, consisting of many <a class="reference internal" href="#detector.Layer" title="detector.Layer"><tt class="xref py py-class docutils literal"><span class="pre">Layer</span></tt></a> detectors.
+Layers will be constructed based on the construction parameters. The
+<a class="reference internal" href="#detector.Detector.pos" title="detector.Detector.pos"><tt class="xref py py-meth docutils literal"><span class="pre">pos()</span></tt></a> method will return the <em>y</em> position of the middle of all
+detectors and the <em>x</em> position of the leftmost layer. Layers will be
+constrcuted between <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">x</span> <span class="pre">+</span> <span class="pre">length</span></tt>. The <em>num_layers</em> parameter
+will be passed to the constructor of the <a class="reference internal" href="#detector.Layer" title="detector.Layer"><tt class="xref py py-class docutils literal"><span class="pre">Layer</span></tt></a> objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; horizontal position of detector</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; horizontal position of detector</li>
+<li><strong>height</strong> (<em>float</em>) &#8211; the height of each layer</li>
+<li><strong>length</strong> (<em>float</em>) &#8211; the length of the whole detector</li>
+<li><strong>num_layers</strong> (<em>int</em>) &#8211; the number of layers that will be constructed -
+first one <tt class="docutils literal"><span class="pre">x</span></tt>, last one at <tt class="docutils literal"><span class="pre">x</span> <span class="pre">+</span> <span class="pre">length</span></tt>.</li>
+<li><strong>num_strips</strong> (<em>int</em>) &#8211; the number of strips that will be constructed in
+<strong>each</strong> layer.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="detector.LayeredDetector.draw">
+<tt class="descname">draw</tt><big>(</big><em>rounding=False</em><big>)</big><a class="reference internal" href="_modules/detector.html#LayeredDetector.draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.LayeredDetector.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the detector with blue markers in the center of each strip of
+the detector and red markers at every registered hit. Pulls in
+<a class="reference external" href="http://matplotlib.org">matplotlib</a> as a dependency. Additionally
+prints the positions of all hits. If <em>rounding</em> is True rounds the
+printed floating point values to 5 decimal digits.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="detector.LayeredDetector.get_layers">
+<tt class="descname">get_layers</tt><big>(</big><em>reverse=False</em><big>)</big><a class="reference internal" href="_modules/detector.html#LayeredDetector.get_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.LayeredDetector.get_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper generator that yields the layers in the detector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reverse</strong> (<em>bool</em>) &#8211; toggle whether to yield in rising or falling <em>x</em>
+order</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="detector.LayeredDetector.propagate_track">
+<tt class="descname">propagate_track</tt><big>(</big><em>track</em><big>)</big><a class="reference internal" href="_modules/detector.html#LayeredDetector.propagate_track"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.LayeredDetector.propagate_track" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagate track through detector, leaving hits in strips. The
+passed track must extend the <a class="reference internal" href="track.html#track.Track" title="track.Track"><tt class="xref py py-class docutils literal"><span class="pre">track.Track</span></tt></a> baseclass. The
+propagated track will leave hits in the strips of this detector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>track</strong> (<em>Track</em>) &#8211; track to propagate</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="detector.LayeredDetector.propagate_tracks">
+<tt class="descname">propagate_tracks</tt><big>(</big><em>tracks</em><big>)</big><a class="reference internal" href="_modules/detector.html#LayeredDetector.propagate_tracks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.LayeredDetector.propagate_tracks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagate all tracks from a list, leaving hits in the detector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tracks</strong> (<em>list(Track)</em>) &#8211; tracks to be propagated through the detector</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="detector.LayeredDetector.x_step">
+<tt class="descname">x_step</tt><a class="reference internal" href="_modules/detector.html#LayeredDetector.x_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#detector.LayeredDetector.x_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return x distance between layers.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">4. <tt class="docutils literal"><span class="pre">detector</span></tt></a><ul>
+<li><a class="reference internal" href="#id1">4.1. <tt class="docutils literal"><span class="pre">Detector</span></tt></a></li>
+<li><a class="reference internal" href="#strip">4.2. <tt class="docutils literal"><span class="pre">Strip</span></tt></a></li>
+<li><a class="reference internal" href="#layer">4.3. <tt class="docutils literal"><span class="pre">Layer</span></tt></a></li>
+<li><a class="reference internal" href="#layereddetector">4.4. <tt class="docutils literal"><span class="pre">LayeredDetector</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="track.html"
+                        title="previous chapter">3. <tt class="docutils literal"><span class="pre">track</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="fitter.html"
+                        title="next chapter">5. <tt class="docutils literal"><span class="pre">fitter</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/detector.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="fitter.html" title="5. fitter"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="track.html" title="3. track"
+             >previous</a> |</li>
+        <li><a href="index.html">JKalFilter 0.9rc documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, jepio.
+      Last updated on Sep 12, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

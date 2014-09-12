@@ -1,0 +1,19 @@
+
+:py:mod:`kfilter`
+=================
+
+.. automodule:: kfilter
+   :no-members:
+
+
+:py:class:`LKFilter`
+--------------------
+.. autoclass:: LKFilter
+   :exclude-members: __dict__,__weakref__
+
+   
+:py:class:`TwoWayLKFilter`
+--------------------------
+.. autoclass:: TwoWayLKFilter
+   :exclude-members: __dict__,__weakref__
+

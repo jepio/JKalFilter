@@ -1,0 +1,12 @@
+
+:py:mod:`fitter`
+===================
+
+.. automodule:: fitter
+   :no-members:
+
+:py:class:`FitManager`
+----------------------
+.. autoclass:: FitManager
+   :exclude-members: __dict__,__weakref__
+   :no-private-members:

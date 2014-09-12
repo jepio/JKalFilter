@@ -1,0 +1,364 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>detector &mdash; JKalFilter 0.9rc documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9rc',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="JKalFilter 0.9rc documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">JKalFilter 0.9rc documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for detector</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot; Module implementing detectors and the detectors interaction with :py:mod:`track`. &quot;&quot;&quot;</span>
+<span class="c"># pylint: disable=C0103,R0913,W0613,W0201,W0141</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">track</span> <span class="kn">import</span> <span class="n">Track</span>
+
+
+<div class="viewcode-block" id="Detector"><a class="viewcode-back" href="../detector.html#detector.Detector">[docs]</a><span class="k">class</span> <span class="nc">Detector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Detector baseclass meant to be inherited by all detectors. Each</span>
+<span class="sd">    detector should implement 3 functionalities:</span>
+
+<span class="sd">    1. :py:meth:`clear_hits` to clear the hits stored in the detector</span>
+<span class="sd">    2. :py:meth:`hit` to hit the detector at the correct location.</span>
+<span class="sd">    3. :py:meth:`pos` to retries the position of the detector.</span>
+
+<span class="sd">    This baseclass provides default implementations of these 3 methods, but</span>
+<span class="sd">    they should be overridden for more complex detectors.</span>
+
+<span class="sd">    :param float x: horizontal position of detector</span>
+<span class="sd">    :param float y: vertical position of detector</span>
+<span class="sd">    :param float x_err: measurement(hit) horizontal uncertainty</span>
+<span class="sd">    :param float y_err: measurement(hit) vertical uncertainty</span>
+<span class="sd">    :var int hits: amount of hits registered in this detector</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_err</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y_err</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="n">types</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">types</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_err</span> <span class="o">=</span> <span class="n">x_err</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_err</span> <span class="o">=</span> <span class="n">y_err</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Detector.hit"><a class="viewcode-back" href="../detector.html#detector.Detector.hit">[docs]</a>    <span class="k">def</span> <span class="nf">hit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Increment the amount of hits in this detector. The default</span>
+<span class="sd">        implementation increments the count by one, not checking passed</span>
+<span class="sd">        parameters&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span> <span class="o">+=</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="Detector.pos"><a class="viewcode-back" href="../detector.html#detector.Detector.pos">[docs]</a>    <span class="k">def</span> <span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the position of the detector.</span>
+
+<span class="sd">        :returns: position of the detector (**x**, **y**)</span>
+<span class="sd">        :rtype: tuple(float)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Detector.clear_hits"><a class="viewcode-back" href="../detector.html#detector.Detector.clear_hits">[docs]</a>    <span class="k">def</span> <span class="nf">clear_hits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Clear hits from detector &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="mi">0</span>
+
+</div></div>
+<div class="viewcode-block" id="Strip"><a class="viewcode-back" href="../detector.html#detector.Strip">[docs]</a><span class="k">class</span> <span class="nc">Strip</span><span class="p">(</span><span class="n">Detector</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; A strip detector, designed to be part of a :py:class:`.Layer`. If</span>
+<span class="sd">    *y_err* is ``None`` then the errors will be computed from uniform</span>
+<span class="sd">    distribution errors. The default method implementations in :py:class:`Detector`</span>
+<span class="sd">    are sufficient for this class.</span>
+
+<span class="sd">    :param float x: horizontal position of detector</span>
+<span class="sd">    :param float y: vertical position of detector</span>
+<span class="sd">    :param float height: The vertical size of the detector</span>
+<span class="sd">    :param float x_err: measurement(hit) horizontal uncertainty</span>
+<span class="sd">    :param float y_err: measurement(hit) vertical uncertainty</span>
+<span class="sd">    :param parent: a reference to the parent detector to which this strip</span>
+<span class="sd">     belongs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">x_err</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y_err</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># Uniform distribution errors</span>
+        <span class="k">if</span> <span class="n">y_err</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">y_err</span> <span class="o">=</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">12</span> <span class="o">**</span> <span class="mf">0.5</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Strip</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x_err</span><span class="p">,</span> <span class="n">y_err</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+</div>
+<div class="viewcode-block" id="Layer"><a class="viewcode-back" href="../detector.html#detector.Layer">[docs]</a><span class="k">class</span> <span class="nc">Layer</span><span class="p">(</span><span class="n">Detector</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; A layer detector containing many :py:class:`.Strip` detectors, meant to</span>
+<span class="sd">    be part of a :py:class:`.LayeredDetector`. The :py:meth:`.clear_hits`</span>
+<span class="sd">    implementation in this class removes hits from this detector and all</span>
+<span class="sd">    detectors that belong to it. The tuple returned by :py:meth:`.pos` will hold</span>
+<span class="sd">    the *x* position of the layer and the *y* position of the middle.</span>
+
+<span class="sd">    Constructed strips will have *y* positions from ``y - height`` to</span>
+<span class="sd">    ``y + height``.</span>
+
+<span class="sd">    :param float x: horizontal position of detector</span>
+<span class="sd">    :param float y: horizontal position of detector</span>
+<span class="sd">    :param float height: the height of the whole layer</span>
+<span class="sd">    :param int num_strips: the amount of strips of which the layer consists -</span>
+<span class="sd">     they will be automatically constructed</span>
+<span class="sd">    :param parent: a reference to the parent detector to which this strip</span>
+<span class="sd">     belongs.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">num_strips</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">bottom</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">height</span> <span class="o">*</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span> <span class="o">=</span> <span class="n">bottom</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">top</span> <span class="o">=</span> <span class="n">top</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span> <span class="o">-</span> <span class="n">bottom</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_strips</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip_height</span> <span class="o">=</span> <span class="n">step</span>
+
+        <span class="c"># Create strips for this layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strips</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">num_strips</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">num_strips</span><span class="p">):</span>
+            <span class="n">new_y</span> <span class="o">=</span> <span class="n">bottom</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Strip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">new_y</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hit_strips</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+<div class="viewcode-block" id="Layer.hit"><a class="viewcode-back" href="../detector.html#detector.Layer.hit">[docs]</a>    <span class="k">def</span> <span class="nf">hit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Increment the hit count in the correct strip. Will find the correct</span>
+<span class="sd">        strip based on the passed *y* parameter. The *x* parameter should</span>
+<span class="sd">        always be the same one as returned by ``self.pos()``.</span>
+
+<span class="sd">        :param float x: **x** position of this detector</span>
+<span class="sd">        :param float y: **y** position at which the detector was hit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">!=</span> <span class="n">x</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Wrong x of layer&quot;</span><span class="p">)</span>
+        <span class="c"># Needs to be this way for the rare case where y == self.top, because</span>
+        <span class="c"># I&#39;m going to use floor (without the equals sign it would attempt to</span>
+        <span class="c"># hit the non-existant detector above).</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">top</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c"># Increment hits in parent(LayeredDetector) and self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">hit</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Layer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">hit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="c"># Increment the proper strip and add strip to hit_strips list</span>
+        <span class="n">num_strip</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip_height</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">num_strip</span><span class="p">]</span><span class="o">.</span><span class="n">hit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">num_strip</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hit_strips</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hit_strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">num_strip</span><span class="p">])</span>
+</div>
+    <span class="k">def</span> <span class="nf">clear_hits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hit_strips</span><span class="p">:</span>
+            <span class="n">strip</span><span class="o">.</span><span class="n">clear_hits</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hit_strips</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="mi">0</span>
+
+</div>
+<div class="viewcode-block" id="LayeredDetector"><a class="viewcode-back" href="../detector.html#detector.LayeredDetector">[docs]</a><span class="k">class</span> <span class="nc">LayeredDetector</span><span class="p">(</span><span class="n">Detector</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; A layered detector, consisting of many :py:class:`.Layer` detectors.</span>
+<span class="sd">    Layers will be constructed based on the construction parameters. The</span>
+<span class="sd">    :py:meth:`.pos` method will return the *y* position of the middle of all</span>
+<span class="sd">    detectors and the *x* position of the leftmost layer. Layers will be</span>
+<span class="sd">    constrcuted between ``x`` and ``x + length``. The *num_layers* parameter</span>
+<span class="sd">    will be passed to the constructor of the :py:class:`Layer` objects.</span>
+
+<span class="sd">    :param float x: horizontal position of detector</span>
+<span class="sd">    :param float y: horizontal position of detector</span>
+<span class="sd">    :param float height: the height of each layer</span>
+<span class="sd">    :param float length: the length of the whole detector</span>
+<span class="sd">    :param int num_layers: the number of layers that will be constructed -</span>
+<span class="sd">     first one ``x``, last one at ``x + length``.</span>
+<span class="sd">    :param int num_strips: the number of strips that will be constructed in</span>
+<span class="sd">     **each** layer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="n">num_strips</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LayeredDetector</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">x_step</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">length</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+            <span class="c"># If number of layers is 1 it means only one layer is going to be</span>
+            <span class="c"># created</span>
+            <span class="n">x_step</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">num_layers</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">num_layers</span><span class="p">):</span>
+            <span class="n">new_x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">x_step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Layer</span><span class="p">(</span><span class="n">new_x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">num_strips</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="LayeredDetector.x_step"><a class="viewcode-back" href="../detector.html#detector.LayeredDetector.x_step">[docs]</a>    <span class="k">def</span> <span class="nf">x_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return x distance between layers.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="c"># returns x position of a layer</span>
+        <span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">layer</span><span class="p">:</span> <span class="n">layer</span><span class="o">.</span><span class="n">pos</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c"># distance between first two layers</span>
+        <span class="n">x_step</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">fun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">x_step</span>
+
+</div>
+<div class="viewcode-block" id="LayeredDetector.get_layers"><a class="viewcode-back" href="../detector.html#detector.LayeredDetector.get_layers">[docs]</a>    <span class="k">def</span> <span class="nf">get_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper generator that yields the layers in the detector.</span>
+
+<span class="sd">        :param bool reverse: toggle whether to yield in rising or falling *x*</span>
+<span class="sd">         order &quot;&quot;&quot;</span>
+        <span class="c"># layers are sorted by x position</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">pos</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
+            <span class="n">layers</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">layer</span>
+</div>
+<div class="viewcode-block" id="LayeredDetector.draw"><a class="viewcode-back" href="../detector.html#detector.LayeredDetector.draw">[docs]</a>    <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rounding</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Draw the detector with blue markers in the center of each strip of</span>
+<span class="sd">        the detector and red markers at every registered hit. Pulls in</span>
+<span class="sd">        `matplotlib &lt;http://matplotlib.org&gt;`_ as a dependency. Additionally</span>
+<span class="sd">        prints the positions of all hits. If *rounding* is True rounds the</span>
+<span class="sd">        printed floating point values to 5 decimal digits. &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hits_x</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hits_y</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hit_mult</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_layers</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+                <span class="n">temp_x</span><span class="p">,</span> <span class="n">temp_y</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_x</span><span class="p">)</span>
+                <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_y</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">hit_strips</span><span class="p">:</span>
+                <span class="n">temp_x</span><span class="p">,</span> <span class="n">temp_y</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+                <span class="n">mulitplicity</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">hits</span>
+                <span class="k">if</span> <span class="n">rounding</span><span class="p">:</span>
+                    <span class="n">temp_x</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">temp_x</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+                    <span class="n">temp_y</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">temp_y</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+                <span class="n">hits_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_x</span><span class="p">)</span>
+                <span class="n">hits_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_y</span><span class="p">)</span>
+                <span class="n">hit_mult</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mulitplicity</span><span class="p">)</span>
+
+        <span class="c">#print &quot;Detector positions:&quot;</span>
+        <span class="c">#print &#39;\n&#39;.join(map(str, zip(x, y)))</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Hit positions:</span><span class="se">\n</span><span class="s">=======================&quot;</span>
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="n">hits_x</span><span class="p">,</span> <span class="n">hits_y</span><span class="p">,</span> <span class="n">hit_mult</span><span class="p">)))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;b&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">hits_x</span><span class="p">,</span> <span class="n">hits_y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&quot;Layered Detector&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">clear_hits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_layers</span><span class="p">():</span>
+            <span class="n">layer</span><span class="o">.</span><span class="n">clear_hits</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="LayeredDetector.propagate_track"><a class="viewcode-back" href="../detector.html#detector.LayeredDetector.propagate_track">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Propagate track through detector, leaving hits in strips. The</span>
+<span class="sd">        passed track must extend the :py:class:`track.Track` baseclass. The</span>
+<span class="sd">        propagated track will leave hits in the strips of this detector.</span>
+
+<span class="sd">        :param track: track to propagate</span>
+<span class="sd">        :type track: Track</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">Track</span><span class="p">)</span>
+        <span class="c"># Sort layers according to x position (just in case)</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_layers</span><span class="p">():</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">get_yintercept</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">layer</span><span class="o">.</span><span class="n">hit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="LayeredDetector.propagate_tracks"><a class="viewcode-back" href="../detector.html#detector.LayeredDetector.propagate_tracks">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_tracks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tracks</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Propagate all tracks from a list, leaving hits in the detector.</span>
+
+<span class="sd">        :param tracks: tracks to be propagated through the detector</span>
+<span class="sd">        :type tracks: list(Track)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tracks</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="n">tracks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">propagate_track</span><span class="p">(</span><span class="n">track</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">JKalFilter 0.9rc documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, jepio.
+      Last updated on Sep 12, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

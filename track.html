@@ -1,0 +1,220 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3. track &mdash; JKalFilter 0.9rc documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9rc',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="JKalFilter 0.9rc documentation" href="index.html" />
+    <link rel="next" title="4. detector" href="detector.html" />
+    <link rel="prev" title="2. kfilter" href="kfilter.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="detector.html" title="4. detector"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="kfilter.html" title="2. kfilter"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">JKalFilter 0.9rc documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-track">
+<span id="track"></span><h1>3. <a class="reference internal" href="#module-track" title="track"><tt class="xref py py-mod docutils literal"><span class="pre">track</span></tt></a><a class="headerlink" href="#module-track" title="Permalink to this headline">¶</a></h1>
+<p>A module implementing various physical tracks that represent objects being
+tracked. This module is meant to gather all possible tracks. Two dimensional
+tracks should extend the <a class="reference internal" href="#track.Track" title="track.Track"><tt class="xref py py-class docutils literal"><span class="pre">Track</span></tt></a> abstract base class. Currently the
+<a class="reference internal" href="#track.LineTrack" title="track.LineTrack"><tt class="xref py py-class docutils literal"><span class="pre">LineTrack</span></tt></a> class has been implemented.</p>
+<div class="section" id="id1">
+<h2>3.1. <a class="reference internal" href="#track.Track" title="track.Track"><tt class="xref py py-class docutils literal"><span class="pre">Track</span></tt></a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="track.Track">
+<em class="property">class </em><tt class="descclassname">track.</tt><tt class="descname">Track</tt><a class="reference internal" href="_modules/track.html#Track"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#track.Track" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A two dimension track interface interface. The interface enforces that
+subclasses implement a constructor and a <a class="reference internal" href="#track.Track.get_yintercept" title="track.Track.get_yintercept"><tt class="xref py py-meth docutils literal"><span class="pre">get_yintercept()</span></tt></a> function.</p>
+<dl class="method">
+<dt id="track.Track.get_yintercept">
+<tt class="descname">get_yintercept</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/track.html#Track.get_yintercept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#track.Track.get_yintercept" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <strong>y</strong> intercept of track with detector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>float</em>) &#8211; coordinate at which to calculate the interception point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>y</strong> value of track for a given <strong>x</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><em>float</em></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="linetrack">
+<h2>3.2. <a class="reference internal" href="#track.LineTrack" title="track.LineTrack"><tt class="xref py py-class docutils literal"><span class="pre">LineTrack</span></tt></a><a class="headerlink" href="#linetrack" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#track.LineTrack" title="track.LineTrack"><tt class="xref py py-class docutils literal"><span class="pre">LineTrack</span></tt></a> is a class representing straight (second derivative is zero)
+tracks. The object can be passed to some classes described in the <a class="reference internal" href="detector.html#module-detector" title="detector"><tt class="xref py py-mod docutils literal"><span class="pre">detector</span></tt></a>
+module for propagation. A common usage pattern connected with this class is
+retrieving <strong>y</strong> values corresponding to some measured <strong>x</strong> positions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">L</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">50</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">L</span><span class="o">*</span><span class="n">i</span><span class="o">/</span><span class="n">N</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">line</span> <span class="o">=</span> <span class="n">LineTrack</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">get_y_intercept</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># work with x and y, plot etc.</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="track.LineTrack">
+<em class="property">class </em><tt class="descclassname">track.</tt><tt class="descname">LineTrack</tt><big>(</big><em>a</em>, <em>b</em><big>)</big><a class="reference internal" href="_modules/track.html#LineTrack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#track.LineTrack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#track.Track" title="track.Track"><tt class="xref py py-class docutils literal"><span class="pre">track.Track</span></tt></a></p>
+<p>A straight line track with the equation <span class="math">\(y = a x + b\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>a</strong> (<em>float</em>) &#8211; slope of track</li>
+<li><strong>b</strong> (<em>float</em>) &#8211; <strong>y</strong> intercept at 0</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="track.gen_straight_tracks">
+<tt class="descclassname">track.</tt><tt class="descname">gen_straight_tracks</tt><big>(</big><em>N=10</em><big>)</big><a class="reference internal" href="_modules/track.html#gen_straight_tracks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#track.gen_straight_tracks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to generate multiple <a class="reference internal" href="#track.LineTrack" title="track.LineTrack"><tt class="xref py py-class docutils literal"><span class="pre">LineTrack</span></tt></a> objects that
+can then be used, e.g. for propagating in a detector. The tracks are
+generated using random numbers to generate the track parameters <strong>a</strong> and
+<strong>b</strong>. Currently the parameter ranges are not adjustable and are the following:</p>
+<ul class="simple">
+<li><strong>a</strong> from -0.268 to 0.268 (corresponds to an angle of -15 to 15 degrees)</li>
+<li><strong>b</strong> from -0.1 to 0.1</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>N</strong> (<em>int</em>) &#8211; amount of tracks to return</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">generated tracks</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><em>list(LineTrack)</em></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3. <tt class="docutils literal"><span class="pre">track</span></tt></a><ul>
+<li><a class="reference internal" href="#id1">3.1. <tt class="docutils literal"><span class="pre">Track</span></tt></a></li>
+<li><a class="reference internal" href="#linetrack">3.2. <tt class="docutils literal"><span class="pre">LineTrack</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="kfilter.html"
+                        title="previous chapter">2. <tt class="docutils literal docutils literal docutils literal"><span class="pre">kfilter</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="detector.html"
+                        title="next chapter">4. <tt class="docutils literal docutils literal docutils literal"><span class="pre">detector</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/track.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="detector.html" title="4. detector"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="kfilter.html" title="2. kfilter"
+             >previous</a> |</li>
+        <li><a href="index.html">JKalFilter 0.9rc documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, jepio.
+      Last updated on Sep 12, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,257 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fitter &mdash; JKalFilter 0.9rc documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9rc',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="JKalFilter 0.9rc documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">JKalFilter 0.9rc documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for fitter</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Fitting module: fit tracks to hits contained within a detector with the help</span>
+<span class="sd">of Kalman Filters.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">matrix</span> <span class="kn">import</span> <span class="n">Matrix</span>
+<span class="kn">from</span> <span class="nn">detector</span> <span class="kn">import</span> <span class="n">Detector</span>
+<span class="kn">from</span> <span class="nn">kfilter</span> <span class="kn">import</span> <span class="n">TwoWayLKFilter</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+
+<div class="viewcode-block" id="FitManager"><a class="viewcode-back" href="../fitter.html#fitter.FitManager">[docs]</a><span class="k">class</span> <span class="nc">FitManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A class that manages the fitting process. It takes a detector object</span>
+<span class="sd">    containing hits and a Kalman filter object with matrices describing the</span>
+<span class="sd">    model with which to perfom the fit. Due to the method used for the fit,</span>
+<span class="sd">    which involves starting at the back of the detector (far from the vertex),</span>
+<span class="sd">    iterating backwards and then forwards again, the supplied Kalman filter</span>
+<span class="sd">    object must subclass the :py:class:`kfilter.TwoWayLKFilter` so that iteration</span>
+<span class="sd">    can be reversed.</span>
+
+<span class="sd">    :param Detector det_obj: detector containing hits to which tracks are to be</span>
+<span class="sd">     fitted</span>
+<span class="sd">    :param TwoWayLKFilter filt_obj: a Kalman filter object using which the tracks</span>
+<span class="sd">     will be fitted.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_obj</span><span class="p">,</span> <span class="n">filt_obj</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">det_obj</span><span class="p">,</span> <span class="n">Detector</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filt_obj</span><span class="p">,</span> <span class="n">TwoWayLKFilter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="o">=</span> <span class="n">det_obj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filt</span> <span class="o">=</span> <span class="n">filt_obj</span>
+        <span class="n">filt_obj</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitters</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_new_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Spawn new filters for hits that could not be assigned to existing</span>
+<span class="sd">        filters.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">hit_strips</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">hits</span><span class="p">):</span>
+                <span class="c"># Create a copy of the filter (all the same matrices)</span>
+                <span class="n">kfilter</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filt</span><span class="p">)</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+                <span class="c"># initialize with first hit</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span> <span class="o">/</span> <span class="n">x</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">cov</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                              <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">]])</span>
+                <span class="c"># thanks to this the filter becomes decoupled from the</span>
+                <span class="c"># original</span>
+                <span class="n">kfilter</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span><span class="p">,</span> <span class="n">cov</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kfilter</span><span class="p">)</span>
+                <span class="n">kfilter</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">layer</span><span class="o">.</span><span class="n">clear_hits</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FitManager.fit"><a class="viewcode-back" href="../fitter.html#fitter.FitManager.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform a fit of the hits in the detector using the supplied</span>
+<span class="sd">        Kalman filter. After tracks have been fitted to the hits, this method</span>
+<span class="sd">        returns a list of Kalman filter objects, each of which contains the</span>
+<span class="sd">        hits that have been assigned to it. The filters are in the state</span>
+<span class="sd">        corresponding to the *x* position one layer distance past the first layer.</span>
+
+<span class="sd">        Before the filters are returned, the ones with less than 3 measurements</span>
+<span class="sd">        assigned to them are removed as unreliable fits. The quickest way to use</span>
+<span class="sd">        the fitted tracks is to get their :py:attr:`measurements_list`::</span>
+
+<span class="sd">            &gt;&gt;&gt; ftr = FitManager(det_obj, filtr_obj)</span>
+<span class="sd">            &gt;&gt;&gt; kfilters = ftr.fit()</span>
+<span class="sd">            &gt;&gt;&gt; for track_y_hits in kfilters.measurements_list:</span>
+<span class="sd">            ...     # do something with y hits of each track</span>
+
+<span class="sd">        :returns: one Kalman filter object for each track that has been assigned</span>
+<span class="sd">         to the hits in the detector</span>
+<span class="sd">        :rtype: *list(TwoWayLKFilter)*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">get_layers</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c"># special procedure for first layer</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_filters</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+
+        <span class="c"># Procedure for the remaining layers</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitters</span><span class="p">:</span>
+                <span class="c"># TODO: investigate hungarian algorithm for assigning hits to</span>
+                <span class="c"># filters</span>
+                <span class="n">state</span><span class="p">,</span> <span class="n">cov_matrix</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">state</span>
+                <span class="n">predicted_y</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">y_err</span> <span class="o">=</span> <span class="n">cov_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c"># find the strip that minimizes the distance to the predicted</span>
+                <span class="c"># y position</span>
+                <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">hit_strips</span><span class="p">:</span>  <span class="c"># if it&#39;s not empty</span>
+                    <span class="n">strip</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">hit_strips</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span>
+                                <span class="k">lambda</span> <span class="n">strip</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">predicted_y</span> <span class="o">-</span> <span class="n">strip</span><span class="o">.</span><span class="n">pos</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">measured_y</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">pos</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">measured_y</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="c"># allow for 3 sigma distance (remember y_err is variance)</span>
+                <span class="k">if</span> <span class="p">((</span><span class="n">measured_y</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span>
+                        <span class="p">((</span><span class="n">measured_y</span> <span class="o">-</span> <span class="n">predicted_y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="mi">9</span> <span class="o">*</span> <span class="n">y_err</span><span class="p">)):</span>
+                    <span class="c"># step ignoring the measurement</span>
+                    <span class="n">fitter</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">measurement</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="n">measured_y</span><span class="p">]])</span>
+                    <span class="n">fitter</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="c"># decrement the amount of hits in strip or remove strip</span>
+                    <span class="c"># from hit_strips</span>
+                    <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">hits</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">layer</span><span class="o">.</span><span class="n">hit_strips</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">strip</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">strip</span><span class="o">.</span><span class="n">hits</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="c"># now time to spawn new filters for measurements that have not been</span>
+            <span class="c"># assigned</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_new_filters</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+
+        <span class="c"># Selection based on amount of measurements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitters</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitters</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">measurements</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitters</span>
+</div>
+<div class="viewcode-block" id="FitManager.propagate_tracks"><a class="viewcode-back" href="../fitter.html#fitter.FitManager.propagate_tracks">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_tracks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Propagate all fitted tracks back towards the back of the detector.</span>
+<span class="sd">        This function is meant to be used directly after :py:meth:`fit` to give</span>
+<span class="sd">        more usable data back to the user. It returns a list of tracks, where each</span>
+<span class="sd">        track is represented by a list of *x* and *y* pairs. Each of these pairs</span>
+<span class="sd">        corresponds to the filtered coordinates of a hit assigned to the track.</span>
+<span class="sd">        A quick way to get *x* and *y* lists for each track is the following::</span>
+
+<span class="sd">            &gt;&gt;&gt; ftr = FitManager(det_obj, filt_obj)</span>
+<span class="sd">            &gt;&gt;&gt; ftr.fit()</span>
+<span class="sd">            &gt;&gt;&gt; tracks = ftr.propagate_tracks()</span>
+<span class="sd">            &gt;&gt;&gt; for track in tracks:</span>
+<span class="sd">            ...     x, y = zip(*track)</span>
+<span class="sd">            ...     # work with coordinates, e.g. plot(x,y)</span>
+<span class="sd">            ...</span>
+
+<span class="sd">        :returns: list of filtered track coordinates</span>
+<span class="sd">        :rtype: *list(list(tuple))*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">x_step</span>
+        <span class="n">start_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">pos</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>  <span class="c"># x position of left-most layer</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">fitter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitters</span><span class="p">:</span>
+            <span class="n">estimates</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">fitter</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="n">current_x</span> <span class="o">=</span> <span class="n">start_x</span> <span class="o">-</span> <span class="n">x_step</span>
+            <span class="c"># state vector, then position in state vector</span>
+            <span class="n">current_y</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c"># initial coordinates</span>
+            <span class="n">estimates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">))</span>
+
+            <span class="c"># One step needs to be performed since filter is set up to first</span>
+            <span class="c"># update then predict.</span>
+            <span class="n">state</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="n">current_y</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">current_x</span> <span class="o">+=</span> <span class="n">x_step</span>
+            <span class="n">estimates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">state</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">fitter</span><span class="p">:</span>
+                <span class="n">current_y</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c"># col. vect: contains y and y&#39;</span>
+                <span class="n">current_x</span> <span class="o">+=</span> <span class="n">x_step</span>
+                <span class="n">estimates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">current_x</span><span class="p">,</span> <span class="n">current_y</span><span class="p">))</span>
+
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">JKalFilter 0.9rc documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, jepio.
+      Last updated on Sep 12, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+
+:py:mod:`track`
+================
+
+.. automodule:: track
+   :no-members:
+
+:py:class:`Track`
+------------------
+.. autoclass:: Track
+   :exclude-members: __dict__,__weakref__
+
+:py:class:`LineTrack`
+----------------------
+
+:py:class:`LineTrack` is a class representing straight (second derivative is zero)
+tracks. The object can be passed to some classes described in the :py:mod:`detector`
+module for propagation. A common usage pattern connected with this class is
+retrieving **y** values corresponding to some measured **x** positions::
+
+    >>> L, N = 3.0, 50
+    >>> x = [L*i/N for i in xrange(N)]
+    >>> line = LineTrack(2.0, -0.5)
+    >>> y = [line.get_y_intercept(i) for i in x]
+    >>> # work with x and y, plot etc.
+
+
+.. autoclass:: LineTrack
+   :exclude-members: __dict__,__weakref__
+
+.. autofunction:: gen_straight_tracks
+

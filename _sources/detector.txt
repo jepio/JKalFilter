@@ -1,0 +1,26 @@
+
+:py:mod:`detector`
+===================
+
+.. automodule:: detector
+   :no-members:
+
+:py:class:`Detector`
+--------------------
+.. autoclass:: Detector
+   :exclude-members: __dict__,__weakref__
+
+:py:class:`Strip`
+--------------------
+.. autoclass:: Strip
+   :exclude-members: __dict__,__weakref__
+
+:py:class:`Layer`
+--------------------
+.. autoclass:: Layer
+   :exclude-members: __dict__,__weakref__
+
+:py:class:`LayeredDetector`
+---------------------------
+.. autoclass:: LayeredDetector
+   :exclude-members: __dict__,__weakref__

@@ -1,0 +1,210 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>5. fitter &mdash; JKalFilter 0.9rc documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9rc',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="JKalFilter 0.9rc documentation" href="index.html" />
+    <link rel="prev" title="4. detector" href="detector.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="detector.html" title="4. detector"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">JKalFilter 0.9rc documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-fitter">
+<span id="fitter"></span><h1>5. <a class="reference internal" href="#module-fitter" title="fitter"><tt class="xref py py-mod docutils literal"><span class="pre">fitter</span></tt></a><a class="headerlink" href="#module-fitter" title="Permalink to this headline">¶</a></h1>
+<p>Fitting module: fit tracks to hits contained within a detector with the help
+of Kalman Filters.</p>
+<div class="section" id="fitmanager">
+<h2>5.1. <a class="reference internal" href="#fitter.FitManager" title="fitter.FitManager"><tt class="xref py py-class docutils literal"><span class="pre">FitManager</span></tt></a><a class="headerlink" href="#fitmanager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fitter.FitManager">
+<em class="property">class </em><tt class="descclassname">fitter.</tt><tt class="descname">FitManager</tt><big>(</big><em>det_obj</em>, <em>filt_obj</em><big>)</big><a class="reference internal" href="_modules/fitter.html#FitManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitter.FitManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>A class that manages the fitting process. It takes a detector object
+containing hits and a Kalman filter object with matrices describing the
+model with which to perfom the fit. Due to the method used for the fit,
+which involves starting at the back of the detector (far from the vertex),
+iterating backwards and then forwards again, the supplied Kalman filter
+object must subclass the <a class="reference internal" href="kfilter.html#kfilter.TwoWayLKFilter" title="kfilter.TwoWayLKFilter"><tt class="xref py py-class docutils literal"><span class="pre">kfilter.TwoWayLKFilter</span></tt></a> so that iteration
+can be reversed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>det_obj</strong> (<em>Detector</em>) &#8211; detector containing hits to which tracks are to be
+fitted</li>
+<li><strong>filt_obj</strong> (<em>TwoWayLKFilter</em>) &#8211; a Kalman filter object using which the tracks
+will be fitted.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="fitter.FitManager.fit">
+<tt class="descname">fit</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/fitter.html#FitManager.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitter.FitManager.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a fit of the hits in the detector using the supplied
+Kalman filter. After tracks have been fitted to the hits, this method
+returns a list of Kalman filter objects, each of which contains the
+hits that have been assigned to it. The filters are in the state
+corresponding to the <em>x</em> position one layer distance past the first layer.</p>
+<p>Before the filters are returned, the ones with less than 3 measurements
+assigned to them are removed as unreliable fits. The quickest way to use
+the fitted tracks is to get their <tt class="xref py py-attr docutils literal"><span class="pre">measurements_list</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ftr</span> <span class="o">=</span> <span class="n">FitManager</span><span class="p">(</span><span class="n">det_obj</span><span class="p">,</span> <span class="n">filtr_obj</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">kfilters</span> <span class="o">=</span> <span class="n">ftr</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">track_y_hits</span> <span class="ow">in</span> <span class="n">kfilters</span><span class="o">.</span><span class="n">measurements_list</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="c"># do something with y hits of each track</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">one Kalman filter object for each track that has been assigned
+to the hits in the detector</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><em>list(TwoWayLKFilter)</em></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="fitter.FitManager.propagate_tracks">
+<tt class="descname">propagate_tracks</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/fitter.html#FitManager.propagate_tracks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fitter.FitManager.propagate_tracks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagate all fitted tracks back towards the back of the detector.
+This function is meant to be used directly after <a class="reference internal" href="#fitter.FitManager.fit" title="fitter.FitManager.fit"><tt class="xref py py-meth docutils literal"><span class="pre">fit()</span></tt></a> to give
+more usable data back to the user. It returns a list of tracks, where each
+track is represented by a list of <em>x</em> and <em>y</em> pairs. Each of these pairs
+corresponds to the filtered coordinates of a hit assigned to the track.
+A quick way to get <em>x</em> and <em>y</em> lists for each track is the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ftr</span> <span class="o">=</span> <span class="n">FitManager</span><span class="p">(</span><span class="n">det_obj</span><span class="p">,</span> <span class="n">filt_obj</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ftr</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tracks</span> <span class="o">=</span> <span class="n">ftr</span><span class="o">.</span><span class="n">propagate_tracks</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="n">tracks</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">track</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="c"># work with coordinates, e.g. plot(x,y)</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of filtered track coordinates</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><em>list(list(tuple))</em></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">5. <tt class="docutils literal"><span class="pre">fitter</span></tt></a><ul>
+<li><a class="reference internal" href="#fitmanager">5.1. <tt class="docutils literal"><span class="pre">FitManager</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="detector.html"
+                        title="previous chapter">4. <tt class="docutils literal docutils literal"><span class="pre">detector</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/fitter.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="detector.html" title="4. detector"
+             >previous</a> |</li>
+        <li><a href="index.html">JKalFilter 0.9rc documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, jepio.
+      Last updated on Sep 12, 2014.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

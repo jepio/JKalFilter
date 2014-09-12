@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to JKal-Filter’s documentation! &mdash; JKal-Filter 0.1 documentation</title>
+    <title>Welcome to JKalFilter’s documentation! &mdash; JKalFilter 0.9rc documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.9rc',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="JKal-Filter 0.1 documentation" href="#" />
+    <link rel="top" title="JKalFilter 0.9rc documentation" href="#" />
     <link rel="next" title="1. matrix" href="matrix.html" /> 
   </head>
   <body>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="matrix.html" title="1. matrix"
              accesskey="N">next</a> |</li>
-        <li><a href="#">JKal-Filter 0.1 documentation</a> &raquo;</li> 
+        <li><a href="#">JKalFilter 0.9rc documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -51,23 +51,51 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-jkal-filter-s-documentation">
-<h1>Welcome to JKal-Filter&#8217;s documentation!<a class="headerlink" href="#welcome-to-jkal-filter-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+  <div class="section" id="welcome-to-jkalfilter-s-documentation">
+<h1>Welcome to JKalFilter&#8217;s documentation!<a class="headerlink" href="#welcome-to-jkalfilter-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>A Kalman Filter library written entirely in Python. JKalFilter is a modular framework
+consisting of building blocks neccessary to use Kalman Filters for various
+applications, not limited to but including track fitting in High Energy Physics.</p>
+<div class="section" id="contents">
+<h2>Contents:<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="matrix.html">1. matrix</a></li>
-<li class="toctree-l1"><a class="reference internal" href="filter.html">2. filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix.html">1. <tt class="docutils literal"><span class="pre">matrix</span></tt></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="matrix.html#id1">1.1. <tt class="docutils literal"><span class="pre">Matrix</span></tt></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kfilter.html">2. <tt class="docutils literal"><span class="pre">kfilter</span></tt></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kfilter.html#lkfilter">2.1. <tt class="docutils literal"><span class="pre">LKFilter</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="kfilter.html#twowaylkfilter">2.2. <tt class="docutils literal"><span class="pre">TwoWayLKFilter</span></tt></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="track.html">3. <tt class="docutils literal"><span class="pre">track</span></tt></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="track.html#id1">3.1. <tt class="docutils literal"><span class="pre">Track</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="track.html#linetrack">3.2. <tt class="docutils literal"><span class="pre">LineTrack</span></tt></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detector.html">4. <tt class="docutils literal"><span class="pre">detector</span></tt></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detector.html#id1">4.1. <tt class="docutils literal"><span class="pre">Detector</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="detector.html#strip">4.2. <tt class="docutils literal"><span class="pre">Strip</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="detector.html#layer">4.3. <tt class="docutils literal"><span class="pre">Layer</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="detector.html#layereddetector">4.4. <tt class="docutils literal"><span class="pre">LayeredDetector</span></tt></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fitter.html">5. <tt class="docutils literal"><span class="pre">fitter</span></tt></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fitter.html#fitmanager">5.1. <tt class="docutils literal"><span class="pre">FitManager</span></tt></a></li>
+</ul>
+</li>
 </ul>
 </div>
-</div>
 <div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<h3>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
 <li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
 <li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
 </ul>
+</div>
+</div>
 </div>
 
 
@@ -78,15 +106,18 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to JKal-Filter&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#">Welcome to JKalFilter&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#contents">Contents:</a><ul>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
 </ul>
 
   <h4>Next topic</h4>
   <p class="topless"><a href="matrix.html"
-                        title="next chapter">1. matrix</a></p>
+                        title="next chapter">1. <tt class="docutils literal"><span class="pre">matrix</span></tt></a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -121,12 +152,12 @@
         <li class="right" >
           <a href="matrix.html" title="1. matrix"
              >next</a> |</li>
-        <li><a href="#">JKal-Filter 0.1 documentation</a> &raquo;</li> 
+        <li><a href="#">JKalFilter 0.9rc documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, jepio.
-      Last updated on Jul 30, 2014.
+      Last updated on Sep 12, 2014.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
