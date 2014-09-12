@@ -1,4 +1,4 @@
-""" A module for testing the functioning of the filter module. """
+""" A module for testing the functioning of the kfilter module. """
 from kfilter import LKFilter
 from matrix import Matrix
 import random

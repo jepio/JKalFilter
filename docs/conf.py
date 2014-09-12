@@ -41,7 +41,7 @@ source_suffix = '.txt'
 master_doc = 'index'
 
 # General information about the project.
-project = u'JKal-Filter'
+project = u'JKalFilter'
 copyright = u'2014, jepio'
 
 # The version info for the project you're documenting, acts as replacement for
