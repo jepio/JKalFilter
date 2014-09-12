@@ -17,10 +17,30 @@ modular framework consisting of 5 core modules:
 Aside from the core modules, tests exist that present the functionalities of
 *matrix*, *kfilter*, *track* and *fitter*.
 
-The whole package can be conveniently imported by using 
+The whole package can be conveniently imported by using:
 ```python
 from JKalFilter import *
 ```
+
+Python version
+--------------
+This framework was only tested on Python 2.7.8. It will not work with Python 3
+unaltered, however the required changes are not significant.
+
+Tests
+-----
+All tests can be run from the command line by executing `python test_<name>.py`.
+If the test requires command line arguments the user will be informed of that.
+
+1. `test_matrix.py` contains unit tests for all functions contained in the
+   matrix module.
+2. `test_filter.py` contains two tests of **LKFilter** used for filtering
+   noise from a first and second degree polynomial. Number of iterations 
+   and function can be selected by passing appropriate command line arguments.
+3. `test_track.py` contains a test of propagating tracks inside a detector.
+   Needs *matplotlib*.
+4. `test_fitting.py` contains a test of the fitting capabilities of the
+   **FitManager**. Needs *matplotlib*.
 
 The folder [libtest](./libtest) contains a simple example of using *ctypes* to
 extend Python using C. Build with `make` and launch `./pytest.py` to see a
