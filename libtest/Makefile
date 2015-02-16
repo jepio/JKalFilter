@@ -1,10 +1,10 @@
 CC=clang
 CFLAGS=-fPIC -shared
 
-all: libtest.so
+all: _libtest.so
 
-%.so: %.c
+_%.so: %.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
-	rm -rf libtest.so
+	rm -rf _libtest.so
