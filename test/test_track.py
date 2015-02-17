@@ -1,7 +1,7 @@
 """ Test of tracking and detector response. """
 # pylint: disable=C0103
-from detector import LayeredDetector
-from track import gen_straight_tracks
+from ..detector import LayeredDetector
+from ..track import gen_straight_tracks
 from matplotlib import pyplot as plt
 
 

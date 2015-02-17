@@ -1,6 +1,6 @@
 """ Matrix module unit tests. """
 # pylint: disable=C0111,R0904,C0326,C0103,W0142
-import matrix
+from .. import matrix
 import unittest
 
 

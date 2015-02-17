@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import numpy as np
 from time import time
-from libtest import gen_array, average
+from ..libtest import gen_array, average
 from contextlib import contextmanager
 import pytest
 

@@ -1,6 +1,6 @@
 """ A module for testing the functioning of the kfilter module. """
-from kfilter import LKFilter
-from matrix import Matrix
+from ..kfilter import LKFilter
+from ..matrix import Matrix
 import random
 import sys
 # pylint: disable=C0103,W0141,R0914

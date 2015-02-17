@@ -1,11 +1,11 @@
 """ Test of fitting. """
 # pylint: disable=C0103
-from matrix import Matrix
-from detector import LayeredDetector
-from track import gen_straight_tracks
+from ..matrix import Matrix
+from ..detector import LayeredDetector
+from ..track import gen_straight_tracks
 from matplotlib import pyplot as plt
-from fitter import FitManager
-from kfilter import TwoWayLKFilter
+from ..fitter import FitManager
+from ..kfilter import TwoWayLKFilter
 plt.ion()
 
 
