@@ -43,8 +43,11 @@ If the test requires command line arguments the user will be informed of that.
    **FitManager**. Needs *matplotlib*.
 
 The folder [libtest](./libtest) contains a simple example of using *ctypes* to
-extend Python using C. Build with `make` and launch `./pytest.py` to see a
+extend Python using C. Build with `make` and launch `./test_libtest.py` to see a
 comparison of run times.
+
+`test_filter`, `test_matrix` and `test_libtest` can all be run automatically
+with `py.test`.
 
 Documentation
 -------------
