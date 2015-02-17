@@ -48,6 +48,7 @@ python -m JKalFilter.test.test_matrix
 If anyone knows how to fix this, please open and issue and tell me.
 
 If the test requires command line arguments the user will be informed of that.
+
 1. `test_matrix.py` contains unit tests for all functions contained in the
    matrix module.
 2. `test_filter.py` contains two tests of **LKFilter** used for filtering
